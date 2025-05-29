@@ -382,10 +382,6 @@ export default function MintIdentity() {
             }}>
               {user.name}
             </div>
-            <div style={{
-              color: "#ffe066", fontSize: 14.5, fontWeight: 500,
-              textShadow: "0 1px 3px #000b"
-            }}>{user.email}</div>
             {/* CONNECT WALLET BUTTON BELOW EMAIL */}
             {!account && (
               <button
