@@ -32,4 +32,6 @@ Below are several screenshots that demonstrate the successful minting process an
 
 These screenshots provide clear evidence of the working system, from user interaction in the dApp, transaction verification on chain, to decentralized storage of identity metadata. This end-to-end flow highlights the transparency, security, and real-world usability of the **Pharos Identity** project.
 
+EXAMPLE: https://afaidentitypharos.vercel.app/
+
 FOLLOW MY COMMUNITY AIRDROP FOR ALL ON TELEGRAM https://t.me/airdrop4ll
