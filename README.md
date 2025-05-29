@@ -47,4 +47,4 @@ For updates, airdrop opportunities, and community discussions, join our channels
 - Telegram Group: [Airdrop 4 All](https://t.me/airdrop4ll)
 - Discord: [@bayybays](https://discord.com/users/bayyBays)
 - Telegram (direct): [@bayybays](https://t.me/bayyBays)
-- Twitter/X: [@bayyvays](https://twitter.com/bayyvays)
+- Twitter/X: [@bayybays](https://twitter.com/bayybayss)
