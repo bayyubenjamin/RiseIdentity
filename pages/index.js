@@ -66,7 +66,7 @@ const LANGUAGES = {
     connect: "Connect Wallet",
     disconnect: "Diskonek Wallet",
     wallet: "Wallet",
-    minted: "Sudah Minted",
+    minted: "Sudah Minted", // Digunakan jika user sudah punya NFT (dari checkMinted)
     mint: "Mint Identity NFT",
     processing: "Memproses...",
     alreadyMinted: "Kamu sudah pernah mint! Satu wallet hanya dapat 1 NFT Identity.",
@@ -77,7 +77,7 @@ const LANGUAGES = {
     checkGoogle: "Login Google dulu!",
     follow: "🚀 Follow CHANNEL AIRDROP FOR ALL",
     powered: "Powered by",
-    explorer: "Lihat di IPFS", // Digunakan untuk link IPFS
+    explorer: "Lihat di IPFS",
     txHashLabel: "Hash Transaksi:",
     ipfsHashLabel: "Hash IPFS Metadata:",
     viewOnExplorer: "Lihat di Explorer Rise",
@@ -90,7 +90,7 @@ const LANGUAGES = {
     connect: "Connect Wallet",
     disconnect: "Disconnect Wallet",
     wallet: "Wallet",
-    minted: "Already Minted",
+    minted: "Already Minted", // Used if user already has an NFT (from checkMinted)
     mint: "Mint Identity NFT",
     processing: "Processing...",
     alreadyMinted: "You've already minted! Only 1 NFT Identity per wallet.",
@@ -101,7 +101,7 @@ const LANGUAGES = {
     checkGoogle: "Login with Google first!",
     follow: "🚀 Follow CHANNEL AIRDROP FOR ALL",
     powered: "Powered by",
-    explorer: "View on IPFS", // Used for IPFS link
+    explorer: "View on IPFS",
     txHashLabel: "Transaction Hash:",
     ipfsHashLabel: "IPFS Metadata Hash:",
     viewOnExplorer: "View on Rise Explorer",
@@ -112,11 +112,11 @@ export default function MintIdentity() {
   const { data: session } = useSession();
   const [account, setAccount] = useState("");
   const [status, setStatus] = useState("");
-  const [minted, setMinted] = useState(false);
-  const [txHash, setTxHash] = useState("");
+  const [minted, setMinted] = useState(false); // True jika user sudah memiliki NFT (dari checkMinted atau mint baru)
+  const [txHash, setTxHash] = useState("");     // Hash transaksi dari mint baru
   const [metadataUrl, setMetadataUrl] = useState("");
-  const [ipfsHashDisplay, setIpfsHashDisplay] = useState(""); // State baru untuk hash IPFS
-  const [loading, setLoading] = useState(false);
+  const [ipfsHashDisplay, setIpfsHashDisplay] = useState("");
+  const [loading, setLoading] = useState(false); // True selama proses minting
   const [cekMintLog, setCekMintLog] = useState("");
   const [nftImg, setNftImg] = useState(NFT_IMAGE);
   const [lang, setLang] = useState("id");
@@ -140,7 +140,7 @@ export default function MintIdentity() {
     setMinted(false);
     setTxHash("");
     setMetadataUrl("");
-    setIpfsHashDisplay(""); // Reset state ipfsHashDisplay
+    setIpfsHashDisplay("");
     setNftImg(NFT_IMAGE);
     setCekMintLog("");
     setStatus("");
@@ -148,51 +148,75 @@ export default function MintIdentity() {
 
   useEffect(() => {
     async function checkMinted() {
-      setCekMintLog("");
-      setMinted(false);
-      setNftImg(NFT_IMAGE);
-      // setTxHash(""); // Sebaiknya txHash tidak di-reset di sini agar tetap tampil jika user sudah mint sebelumnya
-      // setIpfsHashDisplay(""); // Sama seperti txHash
-      if (!account) return;
+      // Reset pesan dan gambar, tapi jangan reset 'minted' jika belum ada akun
+      if (account) {
+        setCekMintLog("");
+        setNftImg(NFT_IMAGE);
+        // Jangan reset txHash & ipfsHashDisplay di sini, agar info mint baru tetap ada
+      } else {
+        setMinted(false); // Pastikan minted false jika tidak ada akun
+        return;
+      }
+
       try {
         const provider = new ethers.BrowserProvider(window.ethereum);
         const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
         const bal = await contract.balanceOf(account);
+        
         if (bal > 0) {
           let tokenId;
           try {
             tokenId = await contract.tokenOfOwnerByIndex(account, 0);
           } catch (e) {
+            console.warn("Tidak bisa mendapatkan tokenId:", e);
             tokenId = null;
           }
-          if (tokenId) {
+
+          if (tokenId !== null) { // Periksa tokenId bukan null
             const tokenUri = await contract.tokenURI(tokenId);
-            setMetadataUrl(tokenUri); // metadataUrl diset jika sudah minted
-            if (tokenUri.includes("/ipfs/")) {
-                setIpfsHashDisplay(tokenUri.split('/ipfs/')[1]); // Ekstrak IPFS hash dari tokenUri
+            setMetadataUrl(tokenUri);
+            if (tokenUri && tokenUri.includes("/ipfs/")) {
+              const hashPart = tokenUri.split('/ipfs/')[1];
+              if (hashPart) setIpfsHashDisplay(hashPart);
             }
             try {
-              const meta = await fetch(tokenUri).then(res => res.json());
-              setNftImg(meta.image || NFT_IMAGE);
+              if (tokenUri) { // Hanya fetch jika tokenUri ada
+                const meta = await fetch(tokenUri).then(res => res.json());
+                setNftImg(meta.image || NFT_IMAGE);
+              }
             } catch (e) {
+              console.warn("Gagal fetch metadata dari tokenUri yang ada:", e);
               setNftImg(NFT_IMAGE);
             }
           }
           setCekMintLog(LANGUAGES[lang].alreadyMinted);
-          setMinted(true);
-          // alert(LANGUAGES[lang].alreadyMinted); // Mungkin tidak perlu alert di sini
+          setMinted(true); // User sudah punya NFT
+          // Hapus alert: alert(LANGUAGES[lang].alreadyMinted);
         } else {
+          // Jika balance 0, pastikan minted false, kecuali jika txHash baru saja di-set dari mint baru
+          if (!txHash) { // Hanya set minted ke false jika tidak ada txHash dari mint baru
+             setMinted(false);
+          }
           setCekMintLog("");
-          setMinted(false);
           setNftImg(NFT_IMAGE);
         }
       } catch (err) {
-        setCekMintLog("Gagal cek status mint: " + (err?.message || err));
+        console.error("Gagal cek status mint:", err);
+        setCekMintLog(LANGUAGES[lang].mintError + " (cek status): " + (err?.message || String(err)));
+        if (!txHash) { // Hanya set minted ke false jika tidak ada txHash dari mint baru
+            setMinted(false);
+        }
       }
     }
-    checkMinted();
+    if (account) { // Hanya jalankan checkMinted jika ada akun
+        checkMinted();
+    } else { // Jika tidak ada akun, pastikan state relevan direset
+        setMinted(false);
+        setCekMintLog("");
+        // txHash dan ipfsHashDisplay sebaiknya tidak direset di sini agar info mint sebelumnya bisa tampil jika user re-login tanpa disconnect
+    }
     // eslint-disable-next-line
-  }, [account, lang]);
+  }, [account, lang]); // Jangan tambahkan txHash di dependency array checkMinted
 
   async function connectMetamask() {
     if (window.ethereum && window.ethereum.isMetaMask) {
