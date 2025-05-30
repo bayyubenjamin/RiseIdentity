@@ -278,7 +278,7 @@ export default function MintIdentity() {
     }
   }
 
-  async function mintIdentityNFT() {
+    async function mintIdentityNFT() {
     // Reset states untuk proses mint baru
     setTxHash("");
     setMetadataUrl("");
@@ -402,6 +402,7 @@ export default function MintIdentity() {
           setMinted(false); 
       }
     }
+  }
 
   function WalletModal() {
     return (
@@ -740,27 +741,26 @@ export default function MintIdentity() {
         <div style={{ textAlign: "center", marginTop: 10 }}>
           <button
             onClick={mintIdentityNFT}
-            disabled={!session || !account || minted || loading}
+            disabled={isMintButtonDisabled}
             style={{
               ...btnStyle("linear-gradient(90deg,#00ffc3 0%,#a259ff 100%)"),
               color: "#1b2130",
               fontWeight: 900,
               margin: "7px 0 22px 0",
-              opacity: (minted && !txHash) || loading ? 0.62 : 1, // Disable if minted (checked on load) but no txHash (not a new mint)
-              cursor: (minted && !txHash) || loading ? "not-allowed" : "pointer",
+              opacity: isMintButtonDisabled ? 0.62 : 1,
+              cursor: isMintButtonDisabled ? "not-allowed" : "pointer",
               boxShadow: "0 2px 18px #00ffc540",
               fontSize: 19,
               width: "100%",
               borderRadius: 13,
               fontFamily: "'Orbitron', 'Montserrat', Arial, sans-serif"
             }}>
-            {/* Logic for button text: if minted on load, show "Already Minted". If loading, show "Processing". Else "Mint". */}
-            {(minted && !txHash && !loading) ? LANGUAGES[lang].minted : loading ? LANGUAGES[lang].processing : LANGUAGES[lang].mint}
+            {mintButtonText}
           </button>
           {cekMintLog && (
             <div style={{
               background: "linear-gradient(93deg,#191d2e 75%,#a259ff22 100%)",
-              color: "#00ffc3",
+              color: cekMintLog.startsWith(LANGUAGES[lang].alreadyMinted) || cekMintLog.startsWith(LANGUAGES[lang].mintSuccess) ? "#00ffc3" : "#f88", // Warna berbeda untuk error
               padding: "13px 20px",
               borderRadius: 16,
               marginTop: 15,
@@ -781,7 +781,7 @@ export default function MintIdentity() {
           fontSize: 16.5,
           fontWeight: 800,
           textAlign: "center",
-          color: status.startsWith("❌") ? "#f88" : "#a259ff", // Error color red
+          color: status.startsWith("❌") ? "#f88" : (status.startsWith("✅") ? "#00ffc3" : "#a259ff"),
           fontFamily: "'Montserrat', Arial, sans-serif",
           textShadow: "0 1px 7px #a259ff33"
         }}>
@@ -789,7 +789,8 @@ export default function MintIdentity() {
         </div>
 
         {/* --- BAGIAN BARU UNTUK MENAMPILKAN TX HASH DAN IPFS HASH SETELAH MINT SUKSES --- */}
-        {minted && txHash && ipfsHashDisplay && (
+        {/* Tampil jika mint baru berhasil (ada txHash dan ipfsHashDisplay) ATAU jika sudah pernah mint dan datanya ada (dari checkMinted, ipfsHashDisplay ada) */}
+        {((txHash && ipfsHashDisplay) || (!txHash && minted && ipfsHashDisplay)) && ( 
           <div style={{ 
             marginTop: '20px', 
             padding: '15px',
@@ -802,24 +803,28 @@ export default function MintIdentity() {
             boxShadow: "0 2px 10px rgba(0, 255, 195, 0.25)",
             color: "#e3eaff"
           }}>
-            <div style={{ marginBottom: '12px' }}>
-              <span style={{ fontWeight: 'bold', color: '#e3eaff' }}>{LANGUAGES[lang].txHashLabel} </span>
-              <a href={`${EXPLORER_BASE}${txHash}`} target="_blank" rel="noopener noreferrer" style={{ color: '#00ffc3', textDecoration: 'underline', wordBreak: 'break-all', display: 'block', marginTop:'3px' }}>
-                {txHash}
-              </a>
-              <a href={`${EXPLORER_BASE}${txHash}`} target="_blank" rel="noopener noreferrer" style={{ color: '#7cb8f9', textDecoration: 'underline', fontSize: '13px', display: 'inline-block', marginTop: '5px' }}>
-                ({LANGUAGES[lang].viewOnExplorer})
-              </a>
-            </div>
-            <div>
-              <span style={{ fontWeight: 'bold', color: '#e3eaff' }}>{LANGUAGES[lang].ipfsHashLabel} </span>
-              <a href={metadataUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#00ffc3', textDecoration: 'underline', wordBreak: 'break-all', display: 'block', marginTop:'3px' }}>
-                {ipfsHashDisplay}
-              </a>
-              <a href={metadataUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#7cb8f9', textDecoration: 'underline', fontSize: '13px', display: 'inline-block', marginTop: '5px' }}>
-                ({LANGUAGES[lang].explorer}) {/* Menggunakan string 'explorer' yang sudah ada */}
-              </a>
-            </div>
+            {txHash && ( /* Hanya tampilkan bagian Tx Hash jika txHash ada (dari mint baru) */
+                <div style={{ marginBottom: '12px' }}>
+                <span style={{ fontWeight: 'bold', color: '#e3eaff' }}>{LANGUAGES[lang].txHashLabel} </span>
+                <a href={`${EXPLORER_BASE}${txHash}`} target="_blank" rel="noopener noreferrer" style={{ color: '#00ffc3', textDecoration: 'underline', wordBreak: 'break-all', display: 'block', marginTop:'3px' }}>
+                    {txHash}
+                </a>
+                <a href={`${EXPLORER_BASE}${txHash}`} target="_blank" rel="noopener noreferrer" style={{ color: '#7cb8f9', textDecoration: 'underline', fontSize: '13px', display: 'inline-block', marginTop: '5px' }}>
+                    ({LANGUAGES[lang].viewOnExplorer})
+                </a>
+                </div>
+            )}
+            {ipfsHashDisplay && metadataUrl && ( /* Tampilkan bagian IPFS jika datanya ada */
+                <div>
+                <span style={{ fontWeight: 'bold', color: '#e3eaff' }}>{LANGUAGES[lang].ipfsHashLabel} </span>
+                <a href={metadataUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#00ffc3', textDecoration: 'underline', wordBreak: 'break-all', display: 'block', marginTop:'3px' }}>
+                    {ipfsHashDisplay}
+                </a>
+                <a href={metadataUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#7cb8f9', textDecoration: 'underline', fontSize: '13px', display: 'inline-block', marginTop: '5px' }}>
+                    ({LANGUAGES[lang].explorer})
+                </a>
+                </div>
+            )}
           </div>
         )}
         {/* --- AKHIR BAGIAN BARU --- */}
