@@ -273,24 +273,21 @@ const pinataOptions = {
 
       setStatus("📤 " + LANGUAGES[lang].processing);
       const res = await fetch("https://api.pinata.cloud/pinning/pinJSONToIPFS", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    "Authorization": `Bearer ${PINATA_JWT.replace(/^Bearer\s+/i, "")}`
-  },
-  body: JSON.stringify({
-    ...pinataOptions,
-    pinataContent: metadata
-  })
-});
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${PINATA_JWT.replace(/^Bearer\s+/i, "")}` // always prefix with Bearer
+        },
+        body: JSON.stringify(metadata)
+      });
       const data = await res.json();
       if (!data.IpfsHash) {
+        // Tambah debug log error Pinata
         console.error("Pinata response error:", data);
         throw new Error("Upload ke Pinata gagal. " + (data.error || JSON.stringify(data)));
       }
       const tokenURI = `https://gateway.pinata.cloud/ipfs/${data.IpfsHash}`;
       setMetadataUrl(tokenURI);
-
       setStatus("✍️ " + LANGUAGES[lang].processing);
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
