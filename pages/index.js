@@ -278,20 +278,36 @@ export default function MintIdentity() {
     }
   }
 
- async function mintIdentityNFT() {
+  async function mintIdentityNFT() {
+    // Reset states untuk proses mint baru
+    setTxHash("");
+    setMetadataUrl("");
+    setIpfsHashDisplay("");
+    setCekMintLog(""); // Hapus pesan cek mint sebelumnya
+    setStatus("");     // Hapus status sebelumnya
+    setLoading(true);
+    // setMinted(false) di sini bisa menyebabkan UI 'berkedip' jika checkMinted sudah menetapkannya true.
+    // Biarkan checkMinted yang mengatur 'minted' berdasarkan balance,
+    // dan logika tombol akan menangani apakah user bisa mint lagi atau tidak.
+
     try {
-      setMinted(false); // Set minted ke false di awal proses mint baru
-      setTxHash("");
-      setMetadataUrl("");
-      setIpfsHashDisplay(""); // Reset ipfs hash display untuk mint baru
-      setLoading(true);
-      setCekMintLog("");
-      setStatus(""); // Clear status sebelumnya
       if (!session) throw new Error(LANGUAGES[lang].checkGoogle);
       if (!account) throw new Error(LANGUAGES[lang].checkWallet);
       if (!PINATA_JWT) throw new Error("PINATA JWT ENV belum di-set! Hubungi admin.");
 
-      setStatus("🔒 " + LANGUAGES[lang].processing);
+      // Periksa lagi apakah sudah minted sebelum memulai proses mahal
+      const providerCheck = new ethers.BrowserProvider(window.ethereum);
+      const contractCheck = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, providerCheck);
+      const currentBalance = await contractCheck.balanceOf(account);
+      if (currentBalance > 0) {
+          setMinted(true); // Set minted true jika balance ada
+          setCekMintLog(LANGUAGES[lang].alreadyMinted);
+          setStatus(""); // Hapus status processing
+          throw new Error(LANGUAGES[lang].alreadyMinted); // Hentikan proses jika sudah punya
+      }
+      setMinted(false); // Jika belum punya, pastikan minted false
+
+      setStatus("🔒 " + LANGUAGES[lang].processing + " (Metadata)");
       const email_hash = SHA256(session.user.email).toString();
 
       const metadata = {
@@ -302,7 +318,7 @@ export default function MintIdentity() {
         image: NFT_IMAGE
       };
 
-      setStatus("📤 " + LANGUAGES[lang].processing);
+      setStatus("📤 " + LANGUAGES[lang].processing + " (Pinata)");
       const res = await fetch("https://api.pinata.cloud/pinning/pinJSONToIPFS", {
         method: "POST",
         headers: {
@@ -311,17 +327,29 @@ export default function MintIdentity() {
         },
         body: JSON.stringify(metadata)
       });
-      const data = await res.json();
-      if (!data.IpfsHash) {
-        console.error("Pinata response error:", data);
-        throw new Error("Upload ke Pinata gagal. " + (data.error || JSON.stringify(data)));
+
+      if (!res.ok) {
+        let errorData = {};
+        try { errorData = await res.json(); } catch (e) { /* abaikan jika bukan JSON */ }
+        console.error("Pinata API request failed:", res.status, res.statusText, errorData);
+        throw new Error(`Upload ke Pinata gagal: ${res.status} ${res.statusText}. ` + (errorData.error?.details || errorData.error || JSON.stringify(errorData) || res.statusText));
       }
-      const ipfsActualHash = data.IpfsHash;
-      setIpfsHashDisplay(ipfsActualHash); // Set hash IPFS mentah
+
+      const data = await res.json();
+      if (!data || typeof data.IpfsHash !== 'string' || data.IpfsHash.trim() === '') {
+        console.error("Pinata response error: IpfsHash tidak valid atau tidak ada.", data);
+        throw new Error("Upload ke Pinata gagal: Respons Pinata tidak mengandung IpfsHash yang valid. Detail: " + JSON.stringify(data));
+      }
+      const ipfsActualHash = data.IpfsHash.trim();
+      
       const tokenURI = `https://gateway.pinata.cloud/ipfs/${ipfsActualHash}`;
+      
+      // Simpan sementara sebelum transaksi, agar jika tx gagal, user masih bisa lihat IPFS hashnya
+      setIpfsHashDisplay(ipfsActualHash); 
       setMetadataUrl(tokenURI);
 
-      setStatus("✍️ " + LANGUAGES[lang].processing);
+
+      setStatus("✍️ " + LANGUAGES[lang].processing + " (Signature)");
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const msg = ethers.solidityPackedKeccak256(
@@ -333,27 +361,47 @@ export default function MintIdentity() {
         params: [msg, account]
       });
 
-      setStatus("🟢 " + LANGUAGES[lang].processing);
+      setStatus("🟢 " + LANGUAGES[lang].processing + " (Transaksi)");
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
       const tx = await contract.mintIdentity(tokenURI, "0x" + email_hash, signature);
-      setStatus("⏳ " + LANGUAGES[lang].processing);
-      await tx.wait();
 
+      if (!tx || typeof tx.hash !== 'string' || tx.hash.trim() === '') {
+        console.error("Minting error: Hash transaksi tidak valid atau tidak ada dari objek 'tx'.", tx);
+        // Meskipun IPFS sudah di-set, transaksi gagal mendapatkan hash.
+        // setIpfsHashDisplay dan setMetadataUrl sudah di-set, biarkan user melihatnya.
+        throw new Error("Minting gagal: Tidak mendapatkan hash transaksi yang valid dari provider.");
+      }
+      const currentTxHash = tx.hash.trim();
+      setTxHash(currentTxHash); // Set txHash segera setelah didapatkan
+
+      setStatus("⏳ " + LANGUAGES[lang].processing + " (Konfirmasi)");
+      const receipt = await tx.wait();
+
+      if (!receipt || typeof receipt.status !== 'number' || receipt.status !== 1) {
+        console.error("Minting error: Transaksi gagal di blockchain setelah konfirmasi.", receipt);
+         // txHash sudah di-set, biarkan user melihatnya untuk investigasi manual.
+        throw new Error("Minting gagal: Transaksi tidak berhasil di blockchain (status receipt: " + (receipt ? receipt.status : 'unknown') + "). Cek explorer dengan hash: " + currentTxHash);
+      }
+
+      // Semua langkah berhasil
       setStatus("✅ " + LANGUAGES[lang].mintSuccess);
-      setTxHash(tx.hash); // Set hash transaksi
-      setMinted(true); // Set minted ke true setelah sukses
+      // txHash, ipfsHashDisplay, metadataUrl sudah di-set
+      setMinted(true); // Minting baru berhasil
       setLoading(false);
-      setCekMintLog(LANGUAGES[lang].mintSuccess); // Set pesan sukses
-      // alert(LANGUAGES[lang].mintSuccess); // Cukup tampilkan di status atau cekMintLog
+      setCekMintLog(LANGUAGES[lang].mintSuccess);
+      // Tidak perlu alert, pesan sudah ada di UI
+
     } catch (err) {
-      setStatus("❌ " + LANGUAGES[lang].mintError + " " + (err?.message || err));
-      setTxHash(""); // Clear tx hash jika error
-      setIpfsHashDisplay(""); // Clear ipfs hash jika error
-      setMetadataUrl(""); // Clear metadata url jika error
+      console.error("Kesalahan detail dalam mintIdentityNFT:", err);
+      setStatus("❌ " + LANGUAGES[lang].mintError + " " + (err?.message || String(err)));
+      // txHash, ipfsHashDisplay, metadataUrl mungkin sudah di-set jika error terjadi di tengah jalan, biarkan.
+      // Jika error di awal (Pinata gagal total), mereka akan kosong.
       setLoading(false);
-      setMinted(false); // Pastikan minted false jika error
+      // Jangan set minted ke false jika errornya adalah "already minted"
+      if (err.message !== LANGUAGES[lang].alreadyMinted) {
+          setMinted(false); 
+      }
     }
-  }
 
   function WalletModal() {
     return (
