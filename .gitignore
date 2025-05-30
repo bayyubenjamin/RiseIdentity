@@ -51,4 +51,3 @@ next-env.d.ts
 
 # Hardhat Ignition deployments
 /ignition/deployments
-
