@@ -792,21 +792,27 @@ const pinataOptions = {
           </div>
         </div>
         {/* End Telegram Card */}
-        <div style={{
-          marginTop: 18,
-          textAlign: "center",
-          fontSize: 15,
-          color: "#a3a6c6",
-          letterSpacing: 0.22,
-          fontWeight: 700,
-          fontFamily: "'Montserrat', Arial, sans-serif"
-        }}>
-          {LANGUAGES[lang].powered} <span style={{ color: "#00ffc3", fontWeight: 900 }}>AFA Community x RISECHAIN</span>
-        </div>
-      </div>
-    </>
-  );
+<div
+  style={{
+    marginTop: 18,
+    textAlign: "center",
+    fontSize: 15,
+    color: "#a3a6c6",
+    letterSpacing: 0.22,
+    fontWeight: 700,
+    fontFamily: "'Montserrat', Arial, sans-serif",
+  }}
+>
+  <span>{LANGUAGES[lang].powered} </span>
+  <span style={{ color: "#00ffc3", fontWeight: 900 }}>
+    AFA Community x RISECHAIN
+  </span>
+</div>
+</div>
+</>
+);
 }
+
 
 // Helper functions
 function shortAddr(addr) {
