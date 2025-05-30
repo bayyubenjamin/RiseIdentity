@@ -1,11 +1,12 @@
 const { ethers } = require("hardhat");
 
 async function main() {
-  const PharosIdentity = await ethers.getContractFactory("PharosIdentity");
-  const pharosIdentity = await PharosIdentity.deploy();
-  await pharosIdentity.waitForDeployment();
+  // Ganti nama contract jika kamu sudah rename ke RiseIdentity, jika tidak tetap pakai PharosIdentity
+  const RiseIdentity = await ethers.getContractFactory("RiseIdentity"); // GANTI JIKA KONTRAK SUDAH DI-RENAME
+  const riseIdentity = await RiseIdentity.deploy();
+  await riseIdentity.waitForDeployment();
 
-  console.log("PharosIdentity deployed to:", pharosIdentity.target);
+  console.log("RiseIdentity deployed to:", riseIdentity.target);
 }
 
 main().catch((error) => {
