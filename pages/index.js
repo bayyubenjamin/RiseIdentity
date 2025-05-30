@@ -701,25 +701,6 @@ const pinataOptions = {
           fontFamily: "'Montserrat', Arial, sans-serif",
           textShadow: "0 1px 7px #a259ff33"
         }}>
-{status && <div>{status}</div>}
-
-  {txHash && (
-    <div style={{ marginTop: 10, textAlign: 'center' }}>
-      <div style={{ fontWeight: 700 }}>Transaction:</div>
-      <a href={`${EXPLORER_BASE}${txHash}`} target="_blank" rel="noopener noreferrer">
-        {shortTx(txHash)}
-      </a>
-    </div>
-  )}
-  {metadataUrl && (
-    <div style={{ marginTop: 10, textAlign: 'center' }}>
-      <div style={{ fontWeight: 700 }}>Metadata (IPFS):</div>
-      <a href={metadataUrl} target="_blank" rel="noopener noreferrer">
-        {metadataUrl}
-      </a>
-    </div>
-  )}
-</div>
           {status}
         </div>
         {/* Telegram Channel Card */}
