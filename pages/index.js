@@ -699,8 +699,7 @@ const pinataOptions = {
           textShadow: "0 1px 7px #a259ff33"
         }}>
           {status}
-        </div>
-        <div style={{marginBottom:7, fontWeight:700}}>
+        </div> <div style={{marginBottom:7, fontWeight:700}}>
               <span style={{color:"#00ffc3"}}>{LANGUAGES[lang].wallet}:</span>
               <span style={{marginLeft:7, fontWeight:500, color:"#fff"}}>{account}</span>
             </div>
