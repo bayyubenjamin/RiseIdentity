@@ -699,99 +699,76 @@ const pinataOptions = {
           textShadow: "0 1px 7px #a259ff33"
         }}>
           {status}
-        </div> <div style={{marginBottom:7, fontWeight:700}}>
-              <span style={{color:"#00ffc3"}}>{LANGUAGES[lang].wallet}:</span>
-              <span style={{marginLeft:7, fontWeight:500, color:"#fff"}}>{account}</span>
-            </div>
-            <div style={{marginBottom:7}}>
-              <span style={{fontWeight:700, color:"#ffe066"}}>Email:</span>
-              <span style={{marginLeft:7, color:"#fff"}}>{session?.user?.email}</span>
-            </div>
-            {metadataUrl && (
-              <div style={{marginBottom:7}}>
-                <span style={{fontWeight:700, color:"#7cb8f9"}}>Metadata:</span>
-                <a href={metadataUrl} target="_blank" rel="noopener" style={{marginLeft:7, color:"#7cb8f9", textDecoration:"underline"}}>{LANGUAGES[lang].explorer}</a>
-              </div>
-            )}
-            {txHash && (
-              <div>
-                <span style={{fontWeight:700, color:"#00ffc3"}}>TX Hash:</span>
-                <a href={EXPLORER_BASE+txHash} target="_blank" rel="noopener" style={{marginLeft:7, color:"#7cf9d4", textDecoration:"underline"}}>
-                  {shortTx(txHash)}
-                </a>
-              </div>
-            )}
-          </div>
-        {/* Telegram Channel Card */}
-        <div style={{
-          marginTop: 40,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center"
-        }}>
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            background: "linear-gradient(90deg,#191d2e 60%,#a259ff33 100%)",
-            padding: "18px 32px",
-            borderRadius: 20,
-            boxShadow: "0 2.5px 22px #a259ff40",
-            border: "2px solid #00ffc355",
-            maxWidth: 400,
-            gap: 17
-          }}>
-            <img
-              src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png"
-              alt="Telegram"
-              width={42}
-              height={42}
-              style={{ borderRadius: 10, marginRight: 10, background: "#fff" }}
-            />
-            <div>
-              <div style={{
-                color: "#00ffc3",
-                fontSize: 17,
-                fontWeight: 900,
-                marginBottom: 3,
-                letterSpacing: 0.13,
-                fontFamily: "'Orbitron', 'Montserrat', Arial, sans-serif"
-              }}>
-                Join Our Official Airdrop Channel
-              </div>
-              <a
-                href="https://t.me/airdrop4ll"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  color: "#7cb8f9",
-                  fontWeight: 900,
-                  fontSize: 18,
-                  letterSpacing: 0.3,
-                  textDecoration: "none",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  marginTop: 3,
-                  fontFamily: "'Orbitron', 'Montserrat', Arial, sans-serif"
-                }}
-              >
-                <span style={{
-                  background: "linear-gradient(90deg,#00ffc3 20%,#a259ff 80%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  fontWeight: 900,
-                  fontSize: 19
-                }}>
-                  t.me/airdrop4ll
-                </span>
-                <svg xmlns="http://www.w3.org/2000/svg" height="19" width="19" viewBox="0 0 24 24" fill="#7cb8f9">
-                  <path d="M5 12h14M12 5l7 7-7 7" stroke="#7cb8f9" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </a>
-            </div>
-          </div>
-        </div>
-        {/* End Telegram Card */}
+        <div style={{ marginBottom: 7, fontWeight: 700 }}>
+  <span style={{ color: "#00ffc3" }}>{LANGUAGES[lang].wallet}:</span>
+  <span style={{ marginLeft: 7, fontWeight: 500, color: "#fff" }}>{account}</span>
+</div>
+<div style={{ marginBottom: 7 }}>
+  <span style={{ fontWeight: 700, color: "#ffe066" }}>Email:</span>
+  <span style={{ marginLeft: 7, color: "#fff" }}>{session?.user?.email}</span>
+</div>
+{metadataUrl && (
+  <div style={{ marginBottom: 7 }}>
+    <span style={{ fontWeight: 700, color: "#7cb8f9" }}>Metadata:</span>
+    <a
+      href={metadataUrl}
+      target="_blank"
+      rel="noopener"
+      style={{
+        marginLeft: 7,
+        color: "#7cb8f9",
+        textDecoration: "underline",
+      }}
+    >
+      {LANGUAGES[lang].explorer}
+    </a>
+  </div>
+)}
+{txHash && (
+  <div>
+    <span style={{ fontWeight: 700, color: "#00ffc3" }}>TX Hash:</span>
+    <a
+      href={EXPLORER_BASE + txHash}
+      target="_blank"
+      rel="noopener"
+      style={{
+        marginLeft: 7,
+        color: "#7cf9d4",
+        textDecoration: "underline",
+      }}
+    >
+      {shortTx(txHash)}
+    </a>
+  </div>
+)}
+
+{/* Telegram Channel Card */}
+<div
+  style={{
+    marginTop: 40,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  }}
+>
+  <div
+    style={{
+      display: "flex",
+      alignItems: "center",
+      background: "linear-gradient(90deg,#191d2e 60%,#a259ff33 100%)",
+      padding: "18px 32px",
+      borderRadius: 20,
+      boxShadow: "0 2.5px 22px #a259ff40",
+      border: "2px solid #00ffc355",
+      maxWidth: 400,
+      gap: 17,
+    }}
+  >
+    {/* … isi Telegram Card … */}
+  </div>
+</div>
+
+{/* Footer Powered By */}
 <div
   style={{
     marginTop: 18,
@@ -803,16 +780,11 @@ const pinataOptions = {
     fontFamily: "'Montserrat', Arial, sans-serif",
   }}
 >
-  <span>{LANGUAGES[lang].powered} </span>
+  <span>{LANGUAGES[lang].powered}&nbsp;</span>
   <span style={{ color: "#00ffc3", fontWeight: 900 }}>
     AFA Community x RISECHAIN
   </span>
 </div>
-</div>
-</>
-);
-}
-
 
 // Helper functions
 function shortAddr(addr) {
