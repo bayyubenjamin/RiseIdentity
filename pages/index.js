@@ -242,7 +242,7 @@ export default function MintIdentity() {
     }
   }
 
-  async function mintIdentityNFT() {
+ async function mintIdentityNFT() {
     try {
       setMinted(false);
       setTxHash("");
@@ -257,34 +257,25 @@ export default function MintIdentity() {
       const email_hash = SHA256(session.user.email).toString();
 
       const metadata = {
-  name: "AFA COMMUNITY x RISE TESTNET IDENTITY",
-  description: "Rise Identity NFT for AFA Community",
-  email_hash: email_hash,
-  wallet: account,
-  image: NFT_IMAGE
-};
-
-// Tambahkan opsi 'pinataMetadata' untuk custom filename
-const pinataOptions = {
-  pinataMetadata: {
-    name: account // ini akan jadi nama file di Pinata/IPFS
-  }
-};
+        name: "AFA COMMUNITY x PHAROS TESTNET IDENTITY",
+        description: "Pharos Identity NFT for AFA Community",
+        email_hash: email_hash,
+        wallet: account,
+        image: NFT_IMAGE
+      };
 
       setStatus("📤 " + LANGUAGES[lang].processing);
       const res = await fetch("https://api.pinata.cloud/pinning/pinJSONToIPFS", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    "Authorization": `Bearer ${PINATA_JWT.replace(/^Bearer\s+/i, "")}`
-  },
-  body: JSON.stringify({
-    ...pinataOptions,
-    pinataContent: metadata
-  })
-});
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${PINATA_JWT.replace(/^Bearer\s+/i, "")}` // always prefix with Bearer
+        },
+        body: JSON.stringify(metadata)
+      });
       const data = await res.json();
       if (!data.IpfsHash) {
+        // Tambah debug log error Pinata
         console.error("Pinata response error:", data);
         throw new Error("Upload ke Pinata gagal. " + (data.error || JSON.stringify(data)));
       }
