@@ -77,7 +77,10 @@ const LANGUAGES = {
     checkGoogle: "Login Google dulu!",
     follow: "🚀 Follow CHANNEL AIRDROP FOR ALL",
     powered: "Powered by",
-    explorer: "Lihat di IPFS"
+    explorer: "Lihat di IPFS", // Digunakan untuk link IPFS
+    txHashLabel: "Hash Transaksi:",
+    ipfsHashLabel: "Hash IPFS Metadata:",
+    viewOnExplorer: "Lihat di Explorer Rise",
   },
   en: {
     title: "Mint Identity NFT",
@@ -98,7 +101,10 @@ const LANGUAGES = {
     checkGoogle: "Login with Google first!",
     follow: "🚀 Follow CHANNEL AIRDROP FOR ALL",
     powered: "Powered by",
-    explorer: "View on IPFS"
+    explorer: "View on IPFS", // Used for IPFS link
+    txHashLabel: "Transaction Hash:",
+    ipfsHashLabel: "IPFS Metadata Hash:",
+    viewOnExplorer: "View on Rise Explorer",
   }
 };
 
@@ -109,13 +115,13 @@ export default function MintIdentity() {
   const [minted, setMinted] = useState(false);
   const [txHash, setTxHash] = useState("");
   const [metadataUrl, setMetadataUrl] = useState("");
+  const [ipfsHashDisplay, setIpfsHashDisplay] = useState(""); // State baru untuk hash IPFS
   const [loading, setLoading] = useState(false);
   const [cekMintLog, setCekMintLog] = useState("");
   const [nftImg, setNftImg] = useState(NFT_IMAGE);
   const [lang, setLang] = useState("id");
   const [showWalletModal, setShowWalletModal] = useState(false);
 
-  // Inject Google Fonts for neon/tech style
   useEffect(() => {
     const link = document.createElement("link");
     link.href =
@@ -134,6 +140,7 @@ export default function MintIdentity() {
     setMinted(false);
     setTxHash("");
     setMetadataUrl("");
+    setIpfsHashDisplay(""); // Reset state ipfsHashDisplay
     setNftImg(NFT_IMAGE);
     setCekMintLog("");
     setStatus("");
@@ -144,6 +151,8 @@ export default function MintIdentity() {
       setCekMintLog("");
       setMinted(false);
       setNftImg(NFT_IMAGE);
+      // setTxHash(""); // Sebaiknya txHash tidak di-reset di sini agar tetap tampil jika user sudah mint sebelumnya
+      // setIpfsHashDisplay(""); // Sama seperti txHash
       if (!account) return;
       try {
         const provider = new ethers.BrowserProvider(window.ethereum);
@@ -158,7 +167,10 @@ export default function MintIdentity() {
           }
           if (tokenId) {
             const tokenUri = await contract.tokenURI(tokenId);
-            setMetadataUrl(tokenUri);
+            setMetadataUrl(tokenUri); // metadataUrl diset jika sudah minted
+            if (tokenUri.includes("/ipfs/")) {
+                setIpfsHashDisplay(tokenUri.split('/ipfs/')[1]); // Ekstrak IPFS hash dari tokenUri
+            }
             try {
               const meta = await fetch(tokenUri).then(res => res.json());
               setNftImg(meta.image || NFT_IMAGE);
@@ -168,7 +180,7 @@ export default function MintIdentity() {
           }
           setCekMintLog(LANGUAGES[lang].alreadyMinted);
           setMinted(true);
-          alert(LANGUAGES[lang].alreadyMinted);
+          // alert(LANGUAGES[lang].alreadyMinted); // Mungkin tidak perlu alert di sini
         } else {
           setCekMintLog("");
           setMinted(false);
@@ -244,11 +256,13 @@ export default function MintIdentity() {
 
  async function mintIdentityNFT() {
     try {
-      setMinted(false);
+      setMinted(false); // Set minted ke false di awal proses mint baru
       setTxHash("");
       setMetadataUrl("");
+      setIpfsHashDisplay(""); // Reset ipfs hash display untuk mint baru
       setLoading(true);
       setCekMintLog("");
+      setStatus(""); // Clear status sebelumnya
       if (!session) throw new Error(LANGUAGES[lang].checkGoogle);
       if (!account) throw new Error(LANGUAGES[lang].checkWallet);
       if (!PINATA_JWT) throw new Error("PINATA JWT ENV belum di-set! Hubungi admin.");
@@ -269,17 +283,18 @@ export default function MintIdentity() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${PINATA_JWT.replace(/^Bearer\s+/i, "")}` // always prefix with Bearer
+          "Authorization": `Bearer ${PINATA_JWT.replace(/^Bearer\s+/i, "")}`
         },
         body: JSON.stringify(metadata)
       });
       const data = await res.json();
       if (!data.IpfsHash) {
-        // Tambah debug log error Pinata
         console.error("Pinata response error:", data);
         throw new Error("Upload ke Pinata gagal. " + (data.error || JSON.stringify(data)));
       }
-      const tokenURI = `https://gateway.pinata.cloud/ipfs/${data.IpfsHash}`;
+      const ipfsActualHash = data.IpfsHash;
+      setIpfsHashDisplay(ipfsActualHash); // Set hash IPFS mentah
+      const tokenURI = `https://gateway.pinata.cloud/ipfs/${ipfsActualHash}`;
       setMetadataUrl(tokenURI);
 
       setStatus("✍️ " + LANGUAGES[lang].processing);
@@ -301,14 +316,18 @@ export default function MintIdentity() {
       await tx.wait();
 
       setStatus("✅ " + LANGUAGES[lang].mintSuccess);
-      setTxHash(tx.hash);
-      setMinted(true);
+      setTxHash(tx.hash); // Set hash transaksi
+      setMinted(true); // Set minted ke true setelah sukses
       setLoading(false);
-      setCekMintLog(LANGUAGES[lang].mintSuccess);
-      alert(LANGUAGES[lang].mintSuccess);
+      setCekMintLog(LANGUAGES[lang].mintSuccess); // Set pesan sukses
+      // alert(LANGUAGES[lang].mintSuccess); // Cukup tampilkan di status atau cekMintLog
     } catch (err) {
       setStatus("❌ " + LANGUAGES[lang].mintError + " " + (err?.message || err));
+      setTxHash(""); // Clear tx hash jika error
+      setIpfsHashDisplay(""); // Clear ipfs hash jika error
+      setMetadataUrl(""); // Clear metadata url jika error
       setLoading(false);
+      setMinted(false); // Pastikan minted false jika error
     }
   }
 
@@ -655,14 +674,16 @@ export default function MintIdentity() {
               color: "#1b2130",
               fontWeight: 900,
               margin: "7px 0 22px 0",
-              opacity: minted || loading ? 0.62 : 1,
+              opacity: (minted && !txHash) || loading ? 0.62 : 1, // Disable if minted (checked on load) but no txHash (not a new mint)
+              cursor: (minted && !txHash) || loading ? "not-allowed" : "pointer",
               boxShadow: "0 2px 18px #00ffc540",
               fontSize: 19,
               width: "100%",
               borderRadius: 13,
               fontFamily: "'Orbitron', 'Montserrat', Arial, sans-serif"
             }}>
-            {minted ? LANGUAGES[lang].minted : loading ? LANGUAGES[lang].processing : LANGUAGES[lang].mint}
+            {/* Logic for button text: if minted on load, show "Already Minted". If loading, show "Processing". Else "Mint". */}
+            {(minted && !txHash && !loading) ? LANGUAGES[lang].minted : loading ? LANGUAGES[lang].processing : LANGUAGES[lang].mint}
           </button>
           {cekMintLog && (
             <div style={{
@@ -688,12 +709,49 @@ export default function MintIdentity() {
           fontSize: 16.5,
           fontWeight: 800,
           textAlign: "center",
-          color: "#a259ff",
+          color: status.startsWith("❌") ? "#f88" : "#a259ff", // Error color red
           fontFamily: "'Montserrat', Arial, sans-serif",
           textShadow: "0 1px 7px #a259ff33"
         }}>
           {status}
         </div>
+
+        {/* --- BAGIAN BARU UNTUK MENAMPILKAN TX HASH DAN IPFS HASH SETELAH MINT SUKSES --- */}
+        {minted && txHash && ipfsHashDisplay && (
+          <div style={{ 
+            marginTop: '20px', 
+            padding: '15px',
+            background: "rgba(0, 255, 195, 0.07)", 
+            border: "1.5px solid #00ffc3",
+            borderRadius: '12px', 
+            textAlign: 'left', 
+            fontSize: '15px', 
+            fontFamily: "'Montserrat', Arial, sans-serif",
+            boxShadow: "0 2px 10px rgba(0, 255, 195, 0.25)",
+            color: "#e3eaff"
+          }}>
+            <div style={{ marginBottom: '12px' }}>
+              <span style={{ fontWeight: 'bold', color: '#e3eaff' }}>{LANGUAGES[lang].txHashLabel} </span>
+              <a href={`${EXPLORER_BASE}${txHash}`} target="_blank" rel="noopener noreferrer" style={{ color: '#00ffc3', textDecoration: 'underline', wordBreak: 'break-all', display: 'block', marginTop:'3px' }}>
+                {txHash}
+              </a>
+              <a href={`${EXPLORER_BASE}${txHash}`} target="_blank" rel="noopener noreferrer" style={{ color: '#7cb8f9', textDecoration: 'underline', fontSize: '13px', display: 'inline-block', marginTop: '5px' }}>
+                ({LANGUAGES[lang].viewOnExplorer})
+              </a>
+            </div>
+            <div>
+              <span style={{ fontWeight: 'bold', color: '#e3eaff' }}>{LANGUAGES[lang].ipfsHashLabel} </span>
+              <a href={metadataUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#00ffc3', textDecoration: 'underline', wordBreak: 'break-all', display: 'block', marginTop:'3px' }}>
+                {ipfsHashDisplay}
+              </a>
+              <a href={metadataUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#7cb8f9', textDecoration: 'underline', fontSize: '13px', display: 'inline-block', marginTop: '5px' }}>
+                ({LANGUAGES[lang].explorer}) {/* Menggunakan string 'explorer' yang sudah ada */}
+              </a>
+            </div>
+          </div>
+        )}
+        {/* --- AKHIR BAGIAN BARU --- */}
+
         {/* Telegram Channel Card */}
         <div style={{
           marginTop: 40,
@@ -785,10 +843,10 @@ function shortAddr(addr) {
   if (!addr) return "";
   return addr.slice(0, 7) + "..." + addr.slice(-4);
 }
-function shortTx(tx) {
-  if (!tx) return "";
-  return tx.slice(0, 8) + "..." + tx.slice(-6);
-}
+// function shortTx(tx) { // Tidak digunakan lagi, menampilkan hash penuh
+//   if (!tx) return "";
+//   return tx.slice(0, 8) + "..." + tx.slice(-6);
+// }
 function btnStyle(bg) {
   return {
     background: bg,
