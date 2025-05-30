@@ -1,7 +1,11 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-// -- untuk Telegram, bisa diaktifkan di bawah ini jika sudah punya bot dan id-nya
 // import TelegramProvider from "next-auth/providers/telegram";
+
+// 🔍 Debug: log env vars (jangan lupa hapus di production!)
+console.log("NEXTAUTH_SECRET:", process.env.NEXTAUTH_SECRET);
+console.log("GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
+console.log("GOOGLE_CLIENT_SECRET:", process.env.GOOGLE_CLIENT_SECRET);
 
 export default NextAuth({
   providers: [
@@ -9,7 +13,6 @@ export default NextAuth({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
-    // Aktifkan jika sudah siap:
     // TelegramProvider({
     //   clientId: process.env.TELEGRAM_CLIENT_ID,
     //   clientSecret: process.env.TELEGRAM_CLIENT_SECRET,
@@ -18,11 +21,9 @@ export default NextAuth({
   session: {
     strategy: "jwt",
   },
-  secret: process.env.NEXTAUTH_SECRET, // TAMBAHKAN BARIS INI!
-  // opsional, untuk custom callback session
+  secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
     async session({ session, token, user }) {
-      // bisa tambahkan data ke session jika perlu
       return session;
     },
   },
