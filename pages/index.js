@@ -700,6 +700,29 @@ const pinataOptions = {
         }}>
           {status}
         </div>
+        <div style={{marginBottom:7, fontWeight:700}}>
+              <span style={{color:"#00ffc3"}}>{LANGUAGES[lang].wallet}:</span>
+              <span style={{marginLeft:7, fontWeight:500, color:"#fff"}}>{account}</span>
+            </div>
+            <div style={{marginBottom:7}}>
+              <span style={{fontWeight:700, color:"#ffe066"}}>Email:</span>
+              <span style={{marginLeft:7, color:"#fff"}}>{session?.user?.email}</span>
+            </div>
+            {metadataUrl && (
+              <div style={{marginBottom:7}}>
+                <span style={{fontWeight:700, color:"#7cb8f9"}}>Metadata:</span>
+                <a href={metadataUrl} target="_blank" rel="noopener" style={{marginLeft:7, color:"#7cb8f9", textDecoration:"underline"}}>{LANGUAGES[lang].explorer}</a>
+              </div>
+            )}
+            {txHash && (
+              <div>
+                <span style={{fontWeight:700, color:"#00ffc3"}}>TX Hash:</span>
+                <a href={EXPLORER_BASE+txHash} target="_blank" rel="noopener" style={{marginLeft:7, color:"#7cf9d4", textDecoration:"underline"}}>
+                  {shortTx(txHash)}
+                </a>
+              </div>
+            )}
+          </div>
         {/* Telegram Channel Card */}
         <div style={{
           marginTop: 40,
