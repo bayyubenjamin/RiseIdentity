@@ -70,7 +70,7 @@ const LANGUAGES = {
     mint: "Mint Identity NFT",
     processing: "Memproses...",
     alreadyMinted: "Kamu sudah pernah mint! Satu wallet hanya dapat 1 NFT Identity.",
-    mintSuccess: "Mint sukses! Kamu sudah punya NFT Identity.",
+    mintSuccess: "Mint success! You already have NFT Identity.",
     mintError: "Terjadi kesalahan saat mint:",
     notInstalled: "Metamask belum terinstall!",
     checkWallet: "Connect wallet dulu!",
