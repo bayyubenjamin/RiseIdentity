@@ -313,8 +313,8 @@ export default function MintIdentity() {
       const email_hash = SHA256(session.user.email).toString();
 
       const metadata = {
-        name: "AFA COMMUNITY x PHAROS TESTNET IDENTITY",
-        description: "Pharos Identity NFT for AFA Community",
+        name: "AFA COMMUNITY x RISE TESTNET IDENTITY",
+        description: "Rise Identity NFT for AFA Community",
         email_hash: email_hash,
         wallet: account,
         image: NFT_IMAGE
