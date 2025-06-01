@@ -12,7 +12,7 @@ contract RiseIdentity is ERC721 {
 
     event Minted(address indexed user, uint256 tokenId, bytes32 emailHash, string tokenUri);
 
-    constructor() ERC721("AFA Identity", "AID") {}
+    constructor() ERC721("AFA Identity", "AFAID") {}
 
     function mintIdentity(
         string memory newTokenUri, // Ganti nama parameter agar tidak tabrakan dengan function tokenURI
