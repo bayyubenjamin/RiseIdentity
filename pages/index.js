@@ -435,7 +435,7 @@ export default function MintIdentity() {
             ...btnStyle("linear-gradient(90deg,#f6851b,#ffb86c)"),
             width: "100%", marginBottom: 15, fontSize: 17, display: "flex", alignItems: "center", justifyContent: "center", gap: 10
           }}>
-            <img src="https://raw.githubusercontent.com/MetaMask/brand-resources/master/SVG/metamask-fox.svg"
+            <img src="https://images.ctfassets.net/clixtyxoaeas/4rnpEzy1ATWRKVBOLxZ1Fm/a74dc1eed36d23d7ea6030383a4d5163/MetaMask-icon-fox.svg"
               alt="Metamask" width={25} style={{ verticalAlign: "middle" }} />
             Metamask
           </button>
@@ -443,7 +443,7 @@ export default function MintIdentity() {
             ...btnStyle("linear-gradient(90deg,#1c60ff,#7cb8f9)"),
             width: "100%", fontSize: 17, display: "flex", alignItems: "center", justifyContent: "center", gap: 10
           }}>
-            <img src="https://static.okx.com/cdn/wallet/logo/okx-wallet-icon.png"
+            <img src="https://developers.moralis.com/wp-content/uploads/web3wiki/47-okx-wallet/645c177c66d302f70d9a863e_OKX-Wallet-Twitter-Logo-300x300.jpeg"
               alt="OKX Wallet" width={25} style={{ verticalAlign: "middle", background: "#fff", borderRadius: 3 }} />
             OKX Wallet
           </button>
