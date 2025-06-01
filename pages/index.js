@@ -751,7 +751,41 @@ export default function MintIdentity() {
           </div>
         )}
         {/* --- AKHIR BAGIAN BARU --- */}
-
+{/* --- BAGIAN BARU UNTUK MENAMPILKAN TX HASH DAN IPFS HASH SETELAH MINT SUKSES --- */}
+{minted && txHash && ipfsHashDisplay && (
+  <div style={{ 
+    marginTop: '20px', 
+    padding: '15px',
+    background: "rgba(0, 255, 195, 0.07)", 
+    border: "1.5px solid #00ffc3",
+    borderRadius: '12px', 
+    textAlign: 'left', 
+    fontSize: '15px', 
+    fontFamily: "'Montserrat', Arial, sans-serif",
+    boxShadow: "0 2px 10px rgba(0, 255, 195, 0.25)",
+    color: "#e3eaff"
+  }}>
+    <div style={{ marginBottom: '12px' }}>
+      <span style={{ fontWeight: 'bold', color: '#e3eaff' }}>{LANGUAGES[lang].txHashLabel} </span>
+      <a href={`<span class="math-inline">\{EXPLORER\_BASE\}</span>{txHash}`} target="_blank" rel="noopener noreferrer" style={{ color: '#00ffc3', textDecoration: 'underline', wordBreak: 'break-all', display: 'block', marginTop:'3px' }}>
+        {txHash}
+      </a>
+      <a href={`<span class="math-inline">\{EXPLORER\_BASE\}</span>{txHash}`} target="_blank" rel="noopener noreferrer" style={{ color: '#7cb8f9', textDecoration: 'underline', fontSize: '13px', display: 'inline-block', marginTop: '5px' }}>
+        ({LANGUAGES[lang].viewOnExplorer})
+      </a>
+    </div>
+    <div>
+      <span style={{ fontWeight: 'bold', color: '#e3eaff' }}>{LANGUAGES[lang].ipfsHashLabel} </span>
+      <a href={metadataUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#00ffc3', textDecoration: 'underline', wordBreak: 'break-all', display: 'block', marginTop:'3px' }}>
+        {ipfsHashDisplay}
+      </a>
+      <a href={metadataUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#7cb8f9', textDecoration: 'underline', fontSize: '13px', display: 'inline-block', marginTop: '5px' }}>
+        ({LANGUAGES[lang].explorer}) {/* Menggunakan string 'explorer' yang sudah ada */}
+      </a>
+    </div>
+  </div>
+)}
+{/* --- AKHIR BAGIAN BARU --- */}
         {/* Telegram Channel Card */}
         <div style={{
           marginTop: 40,
