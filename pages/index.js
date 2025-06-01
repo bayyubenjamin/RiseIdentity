@@ -113,7 +113,7 @@ export default function MintIdentity() {
   const [account, setAccount] = useState("");
   const [status, setStatus] = useState("");
   const [minted, setMinted] = useState(false); // True jika user sudah memiliki NFT (dari checkMinted atau mint baru)
-  const [txHash, setTxHash] = useState("");     // Hash transaksi dari mint baru
+  const [txHash, setTxHash] = useState(""); // Hash transaksi dari mint baru
   const [metadataUrl, setMetadataUrl] = useState("");
   const [ipfsHashDisplay, setIpfsHashDisplay] = useState("");
   const [loading, setLoading] = useState(false); // True selama proses minting
@@ -162,7 +162,7 @@ export default function MintIdentity() {
         const provider = new ethers.BrowserProvider(window.ethereum);
         const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
         const bal = await contract.balanceOf(account);
-        
+
         if (bal > 0) {
           let tokenId;
           try {
@@ -195,7 +195,7 @@ export default function MintIdentity() {
         } else {
           // Jika balance 0, pastikan minted false, kecuali jika txHash baru saja di-set dari mint baru
           if (!txHash) { // Hanya set minted ke false jika tidak ada txHash dari mint baru
-             setMinted(false);
+            setMinted(false);
           }
           setCekMintLog("");
           setNftImg(NFT_IMAGE);
@@ -204,16 +204,16 @@ export default function MintIdentity() {
         console.error("Gagal cek status mint:", err);
         setCekMintLog(LANGUAGES[lang].mintError + " (cek status): " + (err?.message || String(err)));
         if (!txHash) { // Hanya set minted ke false jika tidak ada txHash dari mint baru
-            setMinted(false);
+          setMinted(false);
         }
       }
     }
     if (account) { // Hanya jalankan checkMinted jika ada akun
-        checkMinted();
+      checkMinted();
     } else { // Jika tidak ada akun, pastikan state relevan direset
-        setMinted(false);
-        setCekMintLog("");
-        // txHash dan ipfsHashDisplay sebaiknya tidak direset di sini agar info mint sebelumnya bisa tampil jika user re-login tanpa disconnect
+      setMinted(false);
+      setCekMintLog("");
+      // txHash dan ipfsHashDisplay sebaiknya tidak direset di sini agar info mint sebelumnya bisa tampil jika user re-login tanpa disconnect
     }
     // eslint-disable-next-line
   }, [account, lang]); // Jangan tambahkan txHash di dependency array checkMinted
@@ -221,63 +221,63 @@ export default function MintIdentity() {
   async function connectMetamask() {
     // ... (kode koneksi Metamask tidak berubah)
     if (window.ethereum && window.ethereum.isMetaMask) {
-      try {
-        await window.ethereum.request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: "0xaa2b9b" }]
-        });
-        const [addr] = await window.ethereum.request({ method: "eth_requestAccounts" });
-        setAccount(addr);
-        setShowWalletModal(false);
-      } catch (switchError) {
-        if (switchError.code === 4902) {
-          try {
-            await window.ethereum.request({
-              method: "wallet_addEthereumChain",
-              params: [{
-                chainId: "0xaa2b9b",
-                chainName: "RISE Testnet",
-                rpcUrls: ["https://rpc.testnet.riselabs.xyz"],
-                nativeCurrency: {
-                  name: "Ethereum",
-                  symbol: "ETH",
-                  decimals: 18
-                },
-                blockExplorerUrls: ["https://explorer.testnet.riselabs.xyz"]
-              }]
-            });
-            const [addr] = await window.ethereum.request({ method: "eth_requestAccounts" });
-            setAccount(addr);
-            setShowWalletModal(false);
-          } catch (addError) {
-            alert("Gagal menambahkan jaringan ke Metamask.");
-          }
-        } else {
-          alert("Gagal switch jaringan di Metamask.");
-        }
-      }
-    } else {
-      alert("Metamask belum terpasang di browser Anda!");
-    }
+      try {
+        await window.ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: "0xaa2b9b" }]
+        });
+        const [addr] = await window.ethereum.request({ method: "eth_requestAccounts" });
+        setAccount(addr);
+        setShowWalletModal(false);
+      } catch (switchError) {
+        if (switchError.code === 4902) {
+          try {
+            await window.ethereum.request({
+              method: "wallet_addEthereumChain",
+              params: [{
+                chainId: "0xaa2b9b",
+                chainName: "RISE Testnet",
+                rpcUrls: ["https://rpc.testnet.riselabs.xyz"],
+                nativeCurrency: {
+                  name: "Ethereum",
+                  symbol: "ETH",
+                  decimals: 18
+                },
+                blockExplorerUrls: ["https://explorer.testnet.riselabs.xyz"]
+              }]
+            });
+            const [addr] = await window.ethereum.request({ method: "eth_requestAccounts" });
+            setAccount(addr);
+            setShowWalletModal(false);
+          } catch (addError) {
+            alert("Gagal menambahkan jaringan ke Metamask.");
+          }
+        } else {
+          alert("Gagal switch jaringan di Metamask.");
+        }
+      }
+    } else {
+      alert("Metamask belum terpasang di browser Anda!");
+    }
   }
 
   async function connectOKXWallet() {
     // ... (kode koneksi OKX Wallet tidak berubah)
     if (window.okxwallet) {
-      try {
-        await window.okxwallet.request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: "0xaa2b9b" }]
-        });
-        const [addr] = await window.okxwallet.request({ method: "eth_requestAccounts" });
-        setAccount(addr);
-        setShowWalletModal(false);
-      } catch (err) {
-        alert("Gagal konek OKX Wallet: " + (err?.message || err));
-      }
-    } else {
-      alert("OKX Wallet belum terpasang di browser Anda!");
-    }
+      try {
+        await window.okxwallet.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: "0xaa2b9b" }]
+        });
+        const [addr] = await window.okxwallet.request({ method: "eth_requestAccounts" });
+        setAccount(addr);
+        setShowWalletModal(false);
+      } catch (err) {
+        alert("Gagal konek OKX Wallet: " + (err?.message || err));
+      }
+    } else {
+      alert("OKX Wallet belum terpasang di browser Anda!");
+    }
   }
 
   async function mintIdentityNFT() {
@@ -286,7 +286,7 @@ export default function MintIdentity() {
     setMetadataUrl("");
     setIpfsHashDisplay("");
     setCekMintLog(""); // Hapus pesan cek mint sebelumnya
-    setStatus("");     // Hapus status sebelumnya
+    setStatus(""); // Hapus status sebelumnya
     setLoading(true);
     // setMinted(false) di sini bisa menyebabkan UI 'berkedip' jika checkMinted sudah menetapkannya true.
     // Biarkan checkMinted yang mengatur 'minted' berdasarkan balance,
@@ -302,10 +302,10 @@ export default function MintIdentity() {
       const contractCheck = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, providerCheck);
       const currentBalance = await contractCheck.balanceOf(account);
       if (currentBalance > 0) {
-          setMinted(true); // Set minted true jika balance ada
-          setCekMintLog(LANGUAGES[lang].alreadyMinted);
-          setStatus(""); // Hapus status processing
-          throw new Error(LANGUAGES[lang].alreadyMinted); // Hentikan proses jika sudah punya
+        setMinted(true); // Set minted true jika balance ada
+        setCekMintLog(LANGUAGES[lang].alreadyMinted);
+        setStatus(""); // Hapus status processing
+        throw new Error(LANGUAGES[lang].alreadyMinted); // Hentikan proses jika sudah punya
       }
       setMinted(false); // Jika belum punya, pastikan minted false
 
@@ -343,13 +343,12 @@ export default function MintIdentity() {
         throw new Error("Upload ke Pinata gagal: Respons Pinata tidak mengandung IpfsHash yang valid. Detail: " + JSON.stringify(data));
       }
       const ipfsActualHash = data.IpfsHash.trim();
-      
-      const tokenURI = `https://gateway.pinata.cloud/ipfs/${ipfsActualHash}`;
-      
-      // Simpan sementara sebelum transaksi, agar jika tx gagal, user masih bisa lihat IPFS hashnya
-      setIpfsHashDisplay(ipfsActualHash); 
-      setMetadataUrl(tokenURI);
 
+      const tokenURI = `https://gateway.pinata.cloud/ipfs/${ipfsActualHash}`;
+
+      // Simpan sementara sebelum transaksi, agar jika tx gagal, user masih bisa lihat IPFS hashnya
+      setIpfsHashDisplay(ipfsActualHash);
+      setMetadataUrl(tokenURI);
 
       setStatus("✍️ " + LANGUAGES[lang].processing + " (Signature)");
       const provider = new ethers.BrowserProvider(window.ethereum);
@@ -381,7 +380,7 @@ export default function MintIdentity() {
 
       if (!receipt || typeof receipt.status !== 'number' || receipt.status !== 1) {
         console.error("Minting error: Transaksi gagal di blockchain setelah konfirmasi.", receipt);
-         // txHash sudah di-set, biarkan user melihatnya untuk investigasi manual.
+        // txHash sudah di-set, biarkan user melihatnya untuk investigasi manual.
         throw new Error("Minting gagal: Transaksi tidak berhasil di blockchain (status receipt: " + (receipt ? receipt.status : 'unknown') + "). Cek explorer dengan hash: " + currentTxHash);
       }
 
@@ -401,7 +400,7 @@ export default function MintIdentity() {
       setLoading(false);
       // Jangan set minted ke false jika errornya adalah "already minted"
       if (err.message !== LANGUAGES[lang].alreadyMinted) {
-          setMinted(false); 
+        setMinted(false);
       }
     }
   }
@@ -409,146 +408,146 @@ export default function MintIdentity() {
   function WalletModal() {
     // ... (kode WalletModal tidak berubah)
     return (
-      <div style={{
-        position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
-        background: "rgba(0,0,0,0.32)", display: "flex", alignItems: "center", justifyContent: "center",
-        zIndex: 9999
-      }}>
-        <div style={{
-          background: "rgba(37,31,61,0.97)",
-          borderRadius: 22,
-          padding: 40,
-          minWidth: 320,
-          boxShadow: "0 6px 32px 0 #a259ff44, 0 0px 1px #00ffc344",
-          border: "2.2px solid #a259ff33",
-          backdropFilter: "blur(6px)"
-        }}>
-          <h3 style={{
-            color: "#00ffc3",
-            marginBottom: 22,
-            textAlign: "center",
-            fontSize: 21,
-            fontWeight: 800,
-            letterSpacing: 1,
-            fontFamily: "'Orbitron', 'Montserrat', Arial, sans-serif"
-          }}>Pilih Wallet</h3>
-          <button onClick={connectMetamask} style={{
-            ...btnStyle("linear-gradient(90deg,#f6851b,#ffb86c)"),
-            width: "100%", marginBottom: 15, fontSize: 17, display: "flex", alignItems: "center", justifyContent: "center", gap: 10
-          }}>
-            <img src="https://raw.githubusercontent.com/MetaMask/brand-resources/master/SVG/metamask-fox.svg"
-              alt="Metamask" width={25} style={{ verticalAlign: "middle" }} />
-            Metamask
-          </button>
-          <button onClick={connectOKXWallet} style={{
-            ...btnStyle("linear-gradient(90deg,#1c60ff,#7cb8f9)"),
-            width: "100%", fontSize: 17, display: "flex", alignItems: "center", justifyContent: "center", gap: 10
-          }}>
-            <img src="https://static.okx.com/cdn/wallet/logo/okx-wallet-icon.png"
-              alt="OKX Wallet" width={25} style={{ verticalAlign: "middle", background: "#fff", borderRadius: 3 }} />
-            OKX Wallet
-          </button>
-          <button onClick={() => setShowWalletModal(false)} style={{
-            ...btnStyle("#444"), width: "100%", marginTop: 15, fontSize: 15
-          }}>Batal</button>
-        </div>
-      </div>
-    );
+      <div style={{
+        position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
+        background: "rgba(0,0,0,0.32)", display: "flex", alignItems: "center", justifyContent: "center",
+        zIndex: 9999
+      }}>
+        <div style={{
+          background: "rgba(37,31,61,0.97)",
+          borderRadius: 22,
+          padding: 40,
+          minWidth: 320,
+          boxShadow: "0 6px 32px 0 #a259ff44, 0 0px 1px #00ffc344",
+          border: "2.2px solid #a259ff33",
+          backdropFilter: "blur(6px)"
+        }}>
+          <h3 style={{
+            color: "#00ffc3",
+            marginBottom: 22,
+            textAlign: "center",
+            fontSize: 21,
+            fontWeight: 800,
+            letterSpacing: 1,
+            fontFamily: "'Orbitron', 'Montserrat', Arial, sans-serif"
+          }}>Pilih Wallet</h3>
+          <button onClick={connectMetamask} style={{
+            ...btnStyle("linear-gradient(90deg,#f6851b,#ffb86c)"),
+            width: "100%", marginBottom: 15, fontSize: 17, display: "flex", alignItems: "center", justifyContent: "center", gap: 10
+          }}>
+            <img src="https://raw.githubusercontent.com/MetaMask/brand-resources/master/SVG/metamask-fox.svg"
+              alt="Metamask" width={25} style={{ verticalAlign: "middle" }} />
+            Metamask
+          </button>
+          <button onClick={connectOKXWallet} style={{
+            ...btnStyle("linear-gradient(90deg,#1c60ff,#7cb8f9)"),
+            width: "100%", fontSize: 17, display: "flex", alignItems: "center", justifyContent: "center", gap: 10
+          }}>
+            <img src="https://static.okx.com/cdn/wallet/logo/okx-wallet-icon.png"
+              alt="OKX Wallet" width={25} style={{ verticalAlign: "middle", background: "#fff", borderRadius: 3 }} />
+            OKX Wallet
+          </button>
+          <button onClick={() => setShowWalletModal(false)} style={{
+            ...btnStyle("#444"), width: "100%", marginTop: 15, fontSize: 15
+          }}>Batal</button>
+        </div>
+      </div>
+    );
   }
 
   function GoogleProfile({ user }) {
     // ... (kode GoogleProfile tidak berubah)
     return (
-      <div
-        style={{
-          display: "flex", alignItems: "center", justifyContent: "center",
-          marginBottom: 20,
-        }}
-      >
-        <div style={{
-          display: "flex", alignItems: "center", gap: 18,
-          background: "rgba(35,29,47,0.96)",
-          padding: "18px 26px",
-          borderRadius: 22,
-          boxShadow: "0 3px 18px #00ffc255, 0 1px 10px #a259ff30",
-          border: "2px solid #232837",
-          minWidth: 310,
-          maxWidth: 340,
-          position: "relative",
-          filter: "drop-shadow(0 1px 9px #a259ff33)"
-        }}>
-          <div style={{
-            borderRadius: "50%", border: "3.2px solid #00ffc3", background: "#fff",
-            width: 56, height: 56, display: "flex", alignItems: "center", justifyContent: "center",
-            overflow: "hidden", boxShadow: "0 2px 14px #00ffc322",
-            flexShrink: 0
-          }}>
-            <img
-              src={user.image}
-              alt="avatar"
-              width={54}
-              height={54}
-              style={{
-                borderRadius: "50%",
-                objectFit: "cover",
-                width: "100%",
-                height: "100%"
-              }}
-            />
-          </div>
-          <div style={{ flex: 1 }}>
-            <div style={{
-              fontWeight: 800,
-              fontSize: 19,
-              color: "#00ffc3",
-              letterSpacing: 1,
-              fontFamily: "'Orbitron', 'Montserrat', Arial, sans-serif",
-              marginBottom: 3
-            }}>
-              {user.name}
-            </div>
-            {!account && (
-              <button
-                onClick={() => setShowWalletModal(true)}
-                style={{
-                  ...btnStyle("linear-gradient(90deg,#1976d2,#00ffc3)"),
-                  borderRadius: 8,
-                  fontSize: 15,
-                  fontWeight: 700,
-                  marginTop: 10,
-                  width: "fit-content"
-                }}
-              >
-                {LANGUAGES[lang].connect}
-              </button>
-            )}
-          </div>
-          <div style={{
-            display: "flex", flexDirection: "row", gap: 7,
-            marginLeft: 12, alignItems: "center", justifyContent: "flex-end"
-          }}>
-            <button
-              onClick={() => signOut()}
-              style={{
-                background: "#252d34",
-                color: "#f88",
-                padding: "3px 16px",
-                border: "none",
-                borderRadius: 8,
-                fontWeight: 700,
-                fontSize: 13.5,
-                cursor: "pointer",
-                marginBottom: 0,
-                boxShadow: "0 1px 7px #0002",
-                fontFamily: "'Montserrat', Arial, sans-serif",
-                transition: "all .16s"
-              }}
-              title="Logout Google"
-            >Logout</button>
-          </div>
-        </div>
-      </div>
-    );
+      <div
+        style={{
+          display: "flex", alignItems: "center", justifyContent: "center",
+          marginBottom: 20,
+        }}
+      >
+        <div style={{
+          display: "flex", alignItems: "center", gap: 18,
+          background: "rgba(35,29,47,0.96)",
+          padding: "18px 26px",
+          borderRadius: 22,
+          boxShadow: "0 3px 18px #00ffc255, 0 1px 10px #a259ff30",
+          border: "2px solid #232837",
+          minWidth: 310,
+          maxWidth: 340,
+          position: "relative",
+          filter: "drop-shadow(0 1px 9px #a259ff33)"
+        }}>
+          <div style={{
+            borderRadius: "50%", border: "3.2px solid #00ffc3", background: "#fff",
+            width: 56, height: 56, display: "flex", alignItems: "center", justifyContent: "center",
+            overflow: "hidden", boxShadow: "0 2px 14px #00ffc322",
+            flexShrink: 0
+          }}>
+            <img
+              src={user.image}
+              alt="avatar"
+              width={54}
+              height={54}
+              style={{
+                borderRadius: "50%",
+                objectFit: "cover",
+                width: "100%",
+                height: "100%"
+              }}
+            />
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{
+              fontWeight: 800,
+              fontSize: 19,
+              color: "#00ffc3",
+              letterSpacing: 1,
+              fontFamily: "'Orbitron', 'Montserrat', Arial, sans-serif",
+              marginBottom: 3
+            }}>
+              {user.name}
+            </div>
+            {!account && (
+              <button
+                onClick={() => setShowWalletModal(true)}
+                style={{
+                  ...btnStyle("linear-gradient(90deg,#1976d2,#00ffc3)"),
+                  borderRadius: 8,
+                  fontSize: 15,
+                  fontWeight: 700,
+                  marginTop: 10,
+                  width: "fit-content"
+                }}
+              >
+                {LANGUAGES[lang].connect}
+              </button>
+            )}
+          </div>
+          <div style={{
+            display: "flex", flexDirection: "row", gap: 7,
+            marginLeft: 12, alignItems: "center", justifyContent: "flex-end"
+          }}>
+            <button
+              onClick={() => signOut()}
+              style={{
+                background: "#252d34",
+                color: "#f88",
+                padding: "3px 16px",
+                border: "none",
+                borderRadius: 8,
+                fontWeight: 700,
+                fontSize: 13.5,
+                cursor: "pointer",
+                marginBottom: 0,
+                boxShadow: "0 1px 7px #0002",
+                fontFamily: "'Montserrat', Arial, sans-serif",
+                transition: "all .16s"
+              }}
+              title="Logout Google"
+            >Logout</button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   // Logika Tombol Mint
@@ -559,7 +558,7 @@ export default function MintIdentity() {
   //    DAN tidak ada txHash dari mint baru (artinya 'minted' dari checkMinted)
   const isAlreadyMintedOnLoad = minted && !txHash && !loading;
   const isMintButtonDisabled = !session || !account || loading || isAlreadyMintedOnLoad;
-  
+
   let mintButtonText = LANGUAGES[lang].mint;
   if (loading) {
     mintButtonText = LANGUAGES[lang].processing;
@@ -569,21 +568,20 @@ export default function MintIdentity() {
     mintButtonText = LANGUAGES[lang].mintSuccess; // Atau bisa juga "Mint Lagi?" jika diizinkan, atau "Sudah Minted"
   }
 
-
   return (
     <>
       {/* --- Background Textures & Neon Glows --- */}
       {/* ... (kode background tidak berubah) ... */}
       <div style={{
-        background:
-          "linear-gradient(120deg,#1c1137 50%,#24134a 100%), url('https://www.transparenttextures.com/patterns/diamond-upholstery.png') repeat",
-        minHeight: "100vh",
-        minWidth: "100vw",
-        position: "fixed",
-        top: 0,
-        left: 0,
-        zIndex: 0
-      }} />
+        background:
+          "linear-gradient(120deg,#1c1137 50%,#24134a 100%), url('https://www.transparenttextures.com/patterns/diamond-upholstery.png') repeat",
+        minHeight: "100vh",
+        minWidth: "100vw",
+        position: "fixed",
+        top: 0,
+        left: 0,
+        zIndex: 0
+      }} />
 
       {showWalletModal && <WalletModal />}
       <div
@@ -606,166 +604,166 @@ export default function MintIdentity() {
         {/* Glow accent */}
         {/* ... (kode glow accent tidak berubah) ... */}
         <div style={{
-          position: "absolute",
-          top: -90, left: -90,
-          width: 230,
-          height: 230,
-          background: "radial-gradient(closest-side,#00ffc2cc 0%,#a259ff11 100%)",
-          filter: "blur(45px)",
-          zIndex: 0,
-          pointerEvents: "none"
-        }} />
+          position: "absolute",
+          top: -90, left: -90,
+          width: 230,
+          height: 230,
+          background: "radial-gradient(closest-side,#00ffc2cc 0%,#a259ff11 100%)",
+          filter: "blur(45px)",
+          zIndex: 0,
+          pointerEvents: "none"
+        }} />
         {/* HEADER */}
         {/* ... (kode header tidak berubah) ... */}
         <div style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: 20,
-          zIndex: 1,
-          position: "relative"
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-            <img
-              src="https://ik.imagekit.io/5spt6gb2z/IMG_2894.jpeg"
-              alt="Logo Channel"
-              width={56}
-              height={56}
-              style={{
-                borderRadius: "50%",
-                border: "2.5px solid #00ffc3",
-                background: "#1e1b3a",
-                boxShadow: "0 2px 20px #00ffc355",
-                objectFit: "cover"
-              }}
-            />
-            <h2 style={{
-              fontFamily: "'Orbitron', 'Montserrat', Arial, sans-serif",
-              letterSpacing: 1.6,
-              fontWeight: 900,
-              fontSize: 34,
-              color: "#fff",
-              textShadow: "0 2px 20px #a259ff88, 0 1px 6px #00ffc355",
-              margin: 0,
-              lineHeight: 1.08
-            }}>
-              {LANGUAGES[lang].title}
-            </h2>
-          </div>
-          <button onClick={toggleLang} style={{
-            background: "linear-gradient(90deg,#a259ff 40%,#00ffc3 100%)",
-            color: "#191d2e",
-            border: "none",
-            borderRadius: 15,
-            padding: "7px 20px",
-            fontWeight: 900,
-            cursor: "pointer",
-            fontSize: 16,
-            boxShadow: "0 2px 12px #00ffc344",
-            fontFamily: "'Montserrat', Arial, sans-serif"
-          }}>
-            {lang === "id" ? "English" : "Bahasa"}
-          </button>
-        </div>
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 20,
+          zIndex: 1,
+          position: "relative"
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+            <img
+              src="https://ik.imagekit.io/5spt6gb2z/IMG_2894.jpeg"
+              alt="Logo Channel"
+              width={56}
+              height={56}
+              style={{
+                borderRadius: "50%",
+                border: "2.5px solid #00ffc3",
+                background: "#1e1b3a",
+                boxShadow: "0 2px 20px #00ffc355",
+                objectFit: "cover"
+              }}
+            />
+            <h2 style={{
+              fontFamily: "'Orbitron', 'Montserrat', Arial, sans-serif",
+              letterSpacing: 1.6,
+              fontWeight: 900,
+              fontSize: 34,
+              color: "#fff",
+              textShadow: "0 2px 20px #a259ff88, 0 1px 6px #00ffc355",
+              margin: 0,
+              lineHeight: 1.08
+            }}>
+              {LANGUAGES[lang].title}
+            </h2>
+          </div>
+          <button onClick={toggleLang} style={{
+            background: "linear-gradient(90deg,#a259ff 40%,#00ffc3 100%)",
+            color: "#191d2e",
+            border: "none",
+            borderRadius: 15,
+            padding: "7px 20px",
+            fontWeight: 900,
+            cursor: "pointer",
+            fontSize: 16,
+            boxShadow: "0 2px 12px #00ffc344",
+            fontFamily: "'Montserrat', Arial, sans-serif"
+          }}>
+            {lang === "id" ? "English" : "Bahasa"}
+          </button>
+        </div>
         {/* ... (sisa UI tidak berubah signifikan kecuali tombol mint dan blok hasil) ... */}
         <div style={{
-          textAlign: "center",
-          marginBottom: 21,
-          fontSize: 18,
-          color: "#c3b8fd",
-          letterSpacing: 0.8,
-          fontFamily: "'Montserrat', Arial, sans-serif",
-          fontWeight: 700
-        }}>
-          {LANGUAGES[lang].network}
-        </div>
-        <div style={{
-          display: "flex",
-          justifyContent: "center",
-          marginBottom: 34
-        }}>
-          <div style={{
-            borderRadius: 26,
-            boxShadow: "0 0 38px 7px #a259ff44, 0 6px 22px #00ffc355",
-            border: "4px solid #00ffc3",
-            padding: 7,
-            background: "linear-gradient(120deg, #2a1449 70%, #a259ff33 100%)"
-          }}>
-            <img
-              src={nftImg}
-              alt="NFT Preview"
-              style={{
-                width: 210,
-                height: 210,
-                borderRadius: 18,
-                objectFit: "cover",
-                display: "block",
-                boxShadow: "0 4px 32px #a259ff22"
-              }}
-            />
-          </div>
-        </div>
-        <div style={{
-          marginBottom: 28,
-          textAlign: "center",
-          fontWeight: 800,
-          fontSize: 19,
-          fontFamily: "'Montserrat', Arial, sans-serif"
-        }}>
-          {session ? (
-            <GoogleProfile user={session.user} />
-          ) : (
-            <button onClick={() => signIn("google")} style={{
-              ...btnStyle("linear-gradient(90deg,#a259ff 0%,#00ffc3 100%)"),
-              color: "#191d2e",
-              borderRadius: 13,
-              fontSize: 18,
-              fontWeight: 900,
-              width: "100%",
-              boxShadow: "0 2px 18px #00ffc344",
-              fontFamily: "'Montserrat', Arial, sans-serif"
-            }}>
-              {LANGUAGES[lang].login}
-            </button>
-          )}
-        </div>
-        {account && (
-          <div style={{
-            margin: "0 0 24px 0",
-            textAlign: "center",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: 14
-          }}>
-            <div style={{
-              background: "linear-gradient(90deg,#231e40 70%,#a259ff22 100%)",
-              borderRadius: 10,
-              padding: "8px 18px",
-              fontSize: 17,
-              fontFamily: "'Orbitron', 'Montserrat', Arial, sans-serif",
-              fontWeight: 800,
-              color: "#c3b8fd",
-              border: "1.5px solid #00ffc3",
-              boxShadow: "0 1px 7px #a259ff33"
-            }}>
-              {`${LANGUAGES[lang].wallet}: ${shortAddr(account)}`}
-            </div>
-            <button
-              onClick={disconnectWallet}
-              style={{
-                ...btnStyle("#232837"),
-                fontSize: 15,
-                borderRadius: 10,
-                color: "#fff",
-                fontWeight: 700,
-                border: "1.5px solid #a259ff44"
-              }}
-            >
-              {LANGUAGES[lang].disconnect}
-            </button>
-          </div>
-        )}
+          textAlign: "center",
+          marginBottom: 21,
+          fontSize: 18,
+          color: "#c3b8fd",
+          letterSpacing: 0.8,
+          fontFamily: "'Montserrat', Arial, sans-serif",
+          fontWeight: 700
+        }}>
+          {LANGUAGES[lang].network}
+        </div>
+        <div style={{
+          display: "flex",
+          justifyContent: "center",
+          marginBottom: 34
+        }}>
+          <div style={{
+            borderRadius: 26,
+            boxShadow: "0 0 38px 7px #a259ff44, 0 6px 22px #00ffc355",
+            border: "4px solid #00ffc3",
+            padding: 7,
+            background: "linear-gradient(120deg, #2a1449 70%, #a259ff33 100%)"
+          }}>
+            <img
+              src={nftImg}
+              alt="NFT Preview"
+              style={{
+                width: 210,
+                height: 210,
+                borderRadius: 18,
+                objectFit: "cover",
+                display: "block",
+                boxShadow: "0 4px 32px #a259ff22"
+              }}
+            />
+          </div>
+        </div>
+        <div style={{
+          marginBottom: 28,
+          textAlign: "center",
+          fontWeight: 800,
+          fontSize: 19,
+          fontFamily: "'Montserrat', Arial, sans-serif"
+        }}>
+          {session ? (
+            <GoogleProfile user={session.user} />
+          ) : (
+            <button onClick={() => signIn("google")} style={{
+              ...btnStyle("linear-gradient(90deg,#a259ff 0%,#00ffc3 100%)"),
+              color: "#191d2e",
+              borderRadius: 13,
+              fontSize: 18,
+              fontWeight: 900,
+              width: "100%",
+              boxShadow: "0 2px 18px #00ffc344",
+              fontFamily: "'Montserrat', Arial, sans-serif"
+            }}>
+              {LANGUAGES[lang].login}
+            </button>
+          )}
+        </div>
+        {account && (
+          <div style={{
+            margin: "0 0 24px 0",
+            textAlign: "center",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: 14
+          }}>
+            <div style={{
+              background: "linear-gradient(90deg,#231e40 70%,#a259ff22 100%)",
+              borderRadius: 10,
+              padding: "8px 18px",
+              fontSize: 17,
+              fontFamily: "'Orbitron', 'Montserrat', Arial, sans-serif",
+              fontWeight: 800,
+              color: "#c3b8fd",
+              border: "1.5px solid #00ffc3",
+              boxShadow: "0 1px 7px #a259ff33"
+            }}>
+              {`${LANGUAGES[lang].wallet}: ${shortAddr(account)}`}
+            </div>
+            <button
+              onClick={disconnectWallet}
+              style={{
+                ...btnStyle("#232837"),
+                fontSize: 15,
+                borderRadius: 10,
+                color: "#fff",
+                fontWeight: 700,
+                border: "1.5px solid #a259ff44"
+              }}
+            >
+              {LANGUAGES[lang].disconnect}
+            </button>
+          </div>
+        )}
 
         <div style={{ textAlign: "center", marginTop: 10 }}>
           <button
@@ -819,40 +817,40 @@ export default function MintIdentity() {
 
         {/* --- BAGIAN BARU UNTUK MENAMPILKAN TX HASH DAN IPFS HASH SETELAH MINT SUKSES --- */}
         {/* Tampil jika mint baru berhasil (ada txHash dan ipfsHashDisplay) ATAU jika sudah pernah mint dan datanya ada (dari checkMinted, ipfsHashDisplay ada) */}
-        {((txHash && ipfsHashDisplay) || (!txHash && minted && ipfsHashDisplay)) && ( 
-          <div style={{ 
-            marginTop: '20px', 
+        {((txHash && ipfsHashDisplay) || (!txHash && minted && ipfsHashDisplay)) && (
+          <div style={{
+            marginTop: '20px',
             padding: '15px',
-            background: "rgba(0, 255, 195, 0.07)", 
+            background: "rgba(0, 255, 195, 0.07)",
             border: "1.5px solid #00ffc3",
-            borderRadius: '12px', 
-            textAlign: 'left', 
-            fontSize: '15px', 
+            borderRadius: '12px',
+            textAlign: 'left',
+            fontSize: '15px',
             fontFamily: "'Montserrat', Arial, sans-serif",
             boxShadow: "0 2px 10px rgba(0, 255, 195, 0.25)",
             color: "#e3eaff"
           }}>
             {txHash && ( /* Hanya tampilkan bagian Tx Hash jika txHash ada (dari mint baru) */
-                <div style={{ marginBottom: '12px' }}>
+              <div style={{ marginBottom: '12px' }}>
                 <span style={{ fontWeight: 'bold', color: '#e3eaff' }}>{LANGUAGES[lang].txHashLabel} </span>
-                <a href={`${EXPLORER_BASE}${txHash}`} target="_blank" rel="noopener noreferrer" style={{ color: '#00ffc3', textDecoration: 'underline', wordBreak: 'break-all', display: 'block', marginTop:'3px' }}>
-                    {txHash}
+                <a href={`${EXPLORER_BASE}${txHash}`} target="_blank" rel="noopener noreferrer" style={{ color: '#00ffc3', textDecoration: 'underline', wordBreak: 'break-all', display: 'block', marginTop: '3px' }}>
+                  {txHash}
                 </a>
                 <a href={`${EXPLORER_BASE}${txHash}`} target="_blank" rel="noopener noreferrer" style={{ color: '#7cb8f9', textDecoration: 'underline', fontSize: '13px', display: 'inline-block', marginTop: '5px' }}>
-                    ({LANGUAGES[lang].viewOnExplorer})
+                  ({LANGUAGES[lang].viewOnExplorer})
                 </a>
-                </div>
+              </div>
             )}
             {ipfsHashDisplay && metadataUrl && ( /* Tampilkan bagian IPFS jika datanya ada */
-                <div>
+              <div>
                 <span style={{ fontWeight: 'bold', color: '#e3eaff' }}>{LANGUAGES[lang].ipfsHashLabel} </span>
-                <a href={metadataUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#00ffc3', textDecoration: 'underline', wordBreak: 'break-all', display: 'block', marginTop:'3px' }}>
-                    {ipfsHashDisplay}
+                <a href={metadataUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#00ffc3', textDecoration: 'underline', wordBreak: 'break-all', display: 'block', marginTop: '3px' }}>
+                  {ipfsHashDisplay}
                 </a>
                 <a href={metadataUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#7cb8f9', textDecoration: 'underline', fontSize: '13px', display: 'inline-block', marginTop: '5px' }}>
-                    ({LANGUAGES[lang].explorer})
+                  ({LANGUAGES[lang].explorer})
                 </a>
-                </div>
+              </div>
             )}
           </div>
         )}
@@ -861,73 +859,73 @@ export default function MintIdentity() {
         {/* Telegram Channel Card */}
         {/* ... (kode Telegram card tidak berubah) ... */}
         <div style={{
-          marginTop: 40,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center"
-        }}>
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            background: "linear-gradient(90deg,#191d2e 60%,#a259ff33 100%)",
-            padding: "18px 32px",
-            borderRadius: 20,
-            boxShadow: "0 2.5px 22px #a259ff40",
-            border: "2px solid #00ffc355",
-            maxWidth: 400,
-            gap: 17
-          }}>
-            <img
-              src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png"
-              alt="Telegram"
-              width={42}
-              height={42}
-              style={{ borderRadius: 10, marginRight: 10, background: "#fff" }}
-            />
-            <div>
-              <div style={{
-                color: "#00ffc3",
-                fontSize: 17,
-                fontWeight: 900,
-                marginBottom: 3,
-                letterSpacing: 0.13,
-                fontFamily: "'Orbitron', 'Montserrat', Arial, sans-serif"
-              }}>
-                Join Our Official Airdrop Channel
-              </div>
-              <a
-                href="https://t.me/airdrop4ll"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  color: "#7cb8f9",
-                  fontWeight: 900,
-                  fontSize: 18,
-                  letterSpacing: 0.3,
-                  textDecoration: "none",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  marginTop: 3,
-                  fontFamily: "'Orbitron', 'Montserrat', Arial, sans-serif"
-                }}
-              >
-                <span style={{
-                  background: "linear-gradient(90deg,#00ffc3 20%,#a259ff 80%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  fontWeight: 900,
-                  fontSize: 19
-                }}>
-                  t.me/airdrop4ll
-                </span>
-                <svg xmlns="http://www.w3.org/2000/svg" height="19" width="19" viewBox="0 0 24 24" fill="#7cb8f9">
-                  <path d="M5 12h14M12 5l7 7-7 7" stroke="#7cb8f9" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </a>
-            </div>
-          </div>
-        </div>
+          marginTop: 40,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center"
+        }}>
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            background: "linear-gradient(90deg,#191d2e 60%,#a259ff33 100%)",
+            padding: "18px 32px",
+            borderRadius: 20,
+            boxShadow: "0 2.5px 22px #a259ff40",
+            border: "2px solid #00ffc355",
+            maxWidth: 400,
+            gap: 17
+          }}>
+            <img
+              src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png"
+              alt="Telegram"
+              width={42}
+              height={42}
+              style={{ borderRadius: 10, marginRight: 10, background: "#fff" }}
+            />
+            <div>
+              <div style={{
+                color: "#00ffc3",
+                fontSize: 17,
+                fontWeight: 900,
+                marginBottom: 3,
+                letterSpacing: 0.13,
+                fontFamily: "'Orbitron', 'Montserrat', Arial, sans-serif"
+              }}>
+                Join Our Official Airdrop Channel
+              </div>
+              <a
+                href="https://t.me/airdrop4ll"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  color: "#7cb8f9",
+                  fontWeight: 900,
+                  fontSize: 18,
+                  letterSpacing: 0.3,
+                  textDecoration: "none",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  marginTop: 3,
+                  fontFamily: "'Orbitron', 'Montserrat', Arial, sans-serif"
+                }}
+              >
+                <span style={{
+                  background: "linear-gradient(90deg,#00ffc3 20%,#a259ff 80%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  fontWeight: 900,
+                  fontSize: 19
+                }}>
+                  t.me/airdrop4ll
+                </span>
+                <svg xmlns="http://www.w3.org/2000/svg" height="19" width="19" viewBox="0 0 24 24" fill="#7cb8f9">
+                  <path d="M5 12h14M12 5l7 7-7 7" stroke="#7cb8f9" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
         <div style={{
           marginTop: 18,
           textAlign: "center",
