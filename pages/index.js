@@ -5,7 +5,7 @@ import SHA256 from "crypto-js/sha256";
 
 // --- RISE TESTNET CONFIG ---
 const PINATA_JWT = process.env.NEXT_PUBLIC_PINATA_JWT;
-const CONTRACT_ADDRESS = "0x1327D1fB477f38c1Dec0dF84e64c47368CbAac1A";
+const CONTRACT_ADDRESS = "0xfF157D2A0e1E25d61EeCf139bEdf6210d187Dc7C";
 const CONTRACT_ABI = [
   {
     "inputs": [
