@@ -237,7 +237,7 @@ export default function MintIdentity() {
               params: [{
                 chainId: "0xAA2B9B",
                 chainName: "RISE Testnet",
-                rpcUrls: ["https://rpc.testnet.riselabs.xyz"],
+                rpcUrls: ["https://11155931.rpc.thirdweb.com"],
                 nativeCurrency: {
                   name: "Ethereum",
                   symbol: "ETH",
