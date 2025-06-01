@@ -224,7 +224,7 @@ export default function MintIdentity() {
       try {
         await window.ethereum.request({
           method: "wallet_switchEthereumChain",
-          params: [{ chainId: "0xAA2B9B" }]
+          params: [{ chainId: "0xaa39db" }]
         });
         const [addr] = await window.ethereum.request({ method: "eth_requestAccounts" });
         setAccount(addr);
@@ -235,7 +235,7 @@ export default function MintIdentity() {
             await window.ethereum.request({
               method: "wallet_addEthereumChain",
               params: [{
-                chainId: "0xAA2B9B",
+                chainId: "0xaa39db",
                 chainName: "RISE Testnet",
                 rpcUrls: ["https://testnet.riselabs.xyz"],
                 nativeCurrency: {
@@ -267,7 +267,7 @@ export default function MintIdentity() {
       try {
         await window.okxwallet.request({
           method: "wallet_switchEthereumChain",
-          params: [{ chainId: "0xAA2B9B" }]
+          params: [{ chainId: "0xaa39db" }]
         });
         const [addr] = await window.okxwallet.request({ method: "eth_requestAccounts" });
         setAccount(addr);
