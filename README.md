@@ -63,7 +63,7 @@ _This section can be updated as your project evolves. For now, it might include:
 
 As AFA Identity is currently a demo on the Rise Chain Testnet:
 1.  Ensure you have a Rise-compatible wallet set up for the Testnet.
-2.  Access the dApp demo link: [Your dApp Demo Link Here] (If you have one)
+2.  Access the dApp demo link: [https://afaidentity-risetestnet.vercel.app/] (If you have one)
 3.  Follow the on-screen instructions to connect your wallet and interact with the features.
 4.  (Add any other specific steps for users to try out the demo)
 
