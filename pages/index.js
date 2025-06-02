@@ -1,12 +1,13 @@
-import { useState, useEffect } from "react";
-import { useSession, signIn, signOut } from "next-auth/react";
-import { ethers } from "ethers";
-import SHA256 from "crypto-js/sha256";
+import { useState, useEffect }_from_ "react";
+import { useSession, signIn, signOut } _from_ "next-auth/react";
+import { ethers } _from_ "ethers";
+import SHA256 _from_ "crypto-js/sha256";
 
 // --- RISE TESTNET CONFIG ---
 const PINATA_JWT = process.env.NEXT_PUBLIC_PINATA_JWT;
 const CONTRACT_ADDRESS = "0xfF157D2A0e1E25d61EeCf139bEdf6210d187Dc7C";
 const CONTRACT_ABI = [
+  // ... (ABI Anda tidak berubah)
   {
     "inputs": [
       { "internalType": "string", "name": "newTokenUri", "type": "string" },
@@ -81,6 +82,15 @@ const LANGUAGES = {
     txHashLabel: "Hash Transaksi:",
     ipfsHashLabel: "Hash IPFS Metadata:",
     viewOnExplorer: "Lihat di Explorer Rise",
+    // Keterangan dan Manfaat NFT (BARU)
+    nftSectionTitle: "Tentang NFT Identitas Ini",
+    nftDescription: "NFT Identitas ini adalah token unik yang merepresentasikan partisipasi Anda dalam Komunitas AFA di Rise Testnet. Dibuat khusus untuk anggota komunitas, NFT ini menjadi bukti digital identitas dan keterlibatan Anda.",
+    nftBenefitsTitle: "Manfaat Memiliki NFT Ini:",
+    nftBenefit1: "✅ Tanda kepesertaan eksklusif dalam acara dan inisiatif komunitas.",
+    nftBenefit2: "🎁 Potensi akses ke fitur, airdrop, atau keuntungan khusus di masa depan.",
+    nftBenefit3: "✨ Representasi digital unik dari identitas Anda yang terverifikasi di blockchain.",
+    nftBenefit4: "🛡️ Meningkatkan keamanan dan kepercayaan dalam interaksi digital.",
+    connectedAccountsTitle: "Akun Terhubung:",
   },
   en: {
     title: "Mint Identity NFT",
@@ -105,18 +115,44 @@ const LANGUAGES = {
     txHashLabel: "Transaction Hash:",
     ipfsHashLabel: "IPFS Metadata Hash:",
     viewOnExplorer: "View on Rise Explorer",
+    // NFT Description and Benefits (NEW)
+    nftSectionTitle: "About This Identity NFT",
+    nftDescription: "This Identity NFT is a unique token representing your participation in the AFA Community on the Rise Testnet. Created exclusively for community members, this NFT serves as digital proof of your identity and engagement.",
+    nftBenefitsTitle: "Benefits of Owning This NFT:",
+    nftBenefit1: "✅ Signifies exclusive participation in community events and initiatives.",
+    nftBenefit2: "🎁 Potential access to special features, airdrops, or future benefits.",
+    nftBenefit3: "✨ A unique, blockchain-verified digital representation of your identity.",
+    nftBenefit4: "🛡️ Enhances security and trust in digital interactions.",
+    connectedAccountsTitle: "Connected Accounts:",
   }
 };
+
+// Asumsi fungsi shortAddr dan btnStyle sudah ada atau akan Anda tambahkan
+// Contoh implementasi sederhana jika belum ada:
+const shortAddr = (addr) => addr ? `${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}` : "";
+const btnStyle = (bg) => ({
+  padding: "12px 22px",
+  border: "none",
+  borderRadius: "10px", // Disesuaikan dengan style lain
+  cursor: "pointer",
+  fontWeight: "bold",
+  fontSize: "16px", // Disesuaikan
+  fontFamily: "'Montserrat', Arial, sans-serif",
+  background: bg,
+  transition: "opacity 0.2s, transform 0.2s",
+  boxShadow: "0 2px 8px rgba(0,0,0,0.15)"
+});
+
 
 export default function MintIdentity() {
   const { data: session } = useSession();
   const [account, setAccount] = useState("");
   const [status, setStatus] = useState("");
-  const [minted, setMinted] = useState(false); // True jika user sudah memiliki NFT (dari checkMinted atau mint baru)
-  const [txHash, setTxHash] = useState(""); // Hash transaksi dari mint baru
+  const [minted, setMinted] = useState(false);
+  const [txHash, setTxHash] = useState("");
   const [metadataUrl, setMetadataUrl] = useState("");
   const [ipfsHashDisplay, setIpfsHashDisplay] = useState("");
-  const [loading, setLoading] = useState(false); // True selama proses minting
+  const [loading, setLoading] = useState(false);
   const [cekMintLog, setCekMintLog] = useState("");
   const [nftImg, setNftImg] = useState(NFT_IMAGE);
   const [lang, setLang] = useState("id");
@@ -137,24 +173,22 @@ export default function MintIdentity() {
 
   function disconnectWallet() {
     setAccount("");
-    setMinted(false);
+    setMinted(false); // Reset status minted saat disconnect
     setTxHash("");
     setMetadataUrl("");
     setIpfsHashDisplay("");
-    setNftImg(NFT_IMAGE);
+    setNftImg(NFT_IMAGE); // Reset gambar ke default
     setCekMintLog("");
     setStatus("");
   }
 
   useEffect(() => {
     async function checkMinted() {
-      // Reset pesan dan gambar, tapi jangan reset 'minted' jika belum ada akun
       if (account) {
         setCekMintLog("");
         setNftImg(NFT_IMAGE);
-        // Jangan reset txHash & ipfsHashDisplay di sini, agar info mint baru tetap ada
       } else {
-        setMinted(false); // Pastikan minted false jika tidak ada akun
+        setMinted(false);
         return;
       }
 
@@ -172,7 +206,7 @@ export default function MintIdentity() {
             tokenId = null;
           }
 
-          if (tokenId !== null) { // Periksa tokenId bukan null
+          if (tokenId !== null) {
             const tokenUri = await contract.tokenURI(tokenId);
             setMetadataUrl(tokenUri);
             if (tokenUri && tokenUri.includes("/ipfs/")) {
@@ -180,7 +214,7 @@ export default function MintIdentity() {
               if (hashPart) setIpfsHashDisplay(hashPart);
             }
             try {
-              if (tokenUri) { // Hanya fetch jika tokenUri ada
+              if (tokenUri) {
                 const meta = await fetch(tokenUri).then(res => res.json());
                 setNftImg(meta.image || NFT_IMAGE);
               }
@@ -190,11 +224,9 @@ export default function MintIdentity() {
             }
           }
           setCekMintLog(LANGUAGES[lang].alreadyMinted);
-          setMinted(true); // User sudah punya NFT
-          // Hapus alert: alert(LANGUAGES[lang].alreadyMinted);
+          setMinted(true);
         } else {
-          // Jika balance 0, pastikan minted false, kecuali jika txHash baru saja di-set dari mint baru
-          if (!txHash) { // Hanya set minted ke false jika tidak ada txHash dari mint baru
+          if (!txHash) {
             setMinted(false);
           }
           setCekMintLog("");
@@ -203,17 +235,18 @@ export default function MintIdentity() {
       } catch (err) {
         console.error("Gagal cek status mint:", err);
         setCekMintLog(LANGUAGES[lang].mintError + " (cek status): " + (err?.message || String(err)));
-        if (!txHash) { // Hanya set minted ke false jika tidak ada txHash dari mint baru
+        if (!txHash) {
           setMinted(false);
         }
       }
     }
-    if (account) { // Hanya jalankan checkMinted jika ada akun
+    if (account) {
       checkMinted();
-    } else { // Jika tidak ada akun, pastikan state relevan direset
+    } else {
       setMinted(false);
       setCekMintLog("");
-      // txHash dan ipfsHashDisplay sebaiknya tidak direset di sini agar info mint sebelumnya bisa tampil jika user re-login tanpa disconnect
+      // txHash dan ipfsHashDisplay tidak direset agar info mint sebelumnya bisa tampil jika user re-login wallet tanpa disconnect eksplisit
+      // Namun, jika wallet di-disconnect secara eksplisit, disconnectWallet akan menangani reset.
     }
     // eslint-disable-next-line
   }, [account, lang]); // Jangan tambahkan txHash di dependency array checkMinted
@@ -281,33 +314,30 @@ export default function MintIdentity() {
   }
 
   async function mintIdentityNFT() {
-    // Reset states untuk proses mint baru
+    // ... (kode mintIdentityNFT tidak berubah signifikan, hanya memastikan state di-handle dengan benar)
     setTxHash("");
     setMetadataUrl("");
     setIpfsHashDisplay("");
-    setCekMintLog(""); // Hapus pesan cek mint sebelumnya
-    setStatus(""); // Hapus status sebelumnya
+    setCekMintLog(""); 
+    setStatus(""); 
     setLoading(true);
-    // setMinted(false) di sini bisa menyebabkan UI 'berkedip' jika checkMinted sudah menetapkannya true.
-    // Biarkan checkMinted yang mengatur 'minted' berdasarkan balance,
-    // dan logika tombol akan menangani apakah user bisa mint lagi atau tidak.
 
     try {
       if (!session) throw new Error(LANGUAGES[lang].checkGoogle);
       if (!account) throw new Error(LANGUAGES[lang].checkWallet);
       if (!PINATA_JWT) throw new Error("PINATA JWT ENV belum di-set! Hubungi admin.");
 
-      // Periksa lagi apakah sudah minted sebelum memulai proses mahal
       const providerCheck = new ethers.BrowserProvider(window.ethereum);
       const contractCheck = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, providerCheck);
       const currentBalance = await contractCheck.balanceOf(account);
       if (currentBalance > 0) {
-        setMinted(true); // Set minted true jika balance ada
+        setMinted(true); 
         setCekMintLog(LANGUAGES[lang].alreadyMinted);
-        setStatus(""); // Hapus status processing
-        throw new Error(LANGUAGES[lang].alreadyMinted); // Hentikan proses jika sudah punya
+        setStatus(""); 
+        setLoading(false); // Hentikan loading jika sudah punya
+        throw new Error(LANGUAGES[lang].alreadyMinted);
       }
-      setMinted(false); // Jika belum punya, pastikan minted false
+      setMinted(false); 
 
       setStatus("🔒 " + LANGUAGES[lang].processing + " (Metadata)");
       const email_hash = SHA256(session.user.email).toString();
@@ -343,10 +373,8 @@ export default function MintIdentity() {
         throw new Error("Upload ke Pinata gagal: Respons Pinata tidak mengandung IpfsHash yang valid. Detail: " + JSON.stringify(data));
       }
       const ipfsActualHash = data.IpfsHash.trim();
-
       const tokenURI = `https://gateway.pinata.cloud/ipfs/${ipfsActualHash}`;
 
-      // Simpan sementara sebelum transaksi, agar jika tx gagal, user masih bisa lihat IPFS hashnya
       setIpfsHashDisplay(ipfsActualHash);
       setMetadataUrl(tokenURI);
 
@@ -368,39 +396,39 @@ export default function MintIdentity() {
 
       if (!tx || typeof tx.hash !== 'string' || tx.hash.trim() === '') {
         console.error("Minting error: Hash transaksi tidak valid atau tidak ada dari objek 'tx'.", tx);
-        // Meskipun IPFS sudah di-set, transaksi gagal mendapatkan hash.
-        // setIpfsHashDisplay dan setMetadataUrl sudah di-set, biarkan user melihatnya.
         throw new Error("Minting gagal: Tidak mendapatkan hash transaksi yang valid dari provider.");
       }
       const currentTxHash = tx.hash.trim();
-      setTxHash(currentTxHash); // Set txHash segera setelah didapatkan
+      setTxHash(currentTxHash); 
 
       setStatus("⏳ " + LANGUAGES[lang].processing + " (Konfirmasi)");
       const receipt = await tx.wait();
 
       if (!receipt || typeof receipt.status !== 'number' || receipt.status !== 1) {
         console.error("Minting error: Transaksi gagal di blockchain setelah konfirmasi.", receipt);
-        // txHash sudah di-set, biarkan user melihatnya untuk investigasi manual.
         throw new Error("Minting gagal: Transaksi tidak berhasil di blockchain (status receipt: " + (receipt ? receipt.status : 'unknown') + "). Cek explorer dengan hash: " + currentTxHash);
       }
 
-      // Semua langkah berhasil
       setStatus("✅ " + LANGUAGES[lang].mintSuccess);
-      // txHash, ipfsHashDisplay, metadataUrl sudah di-set
-      setMinted(true); // Minting baru berhasil
+      setMinted(true); 
       setLoading(false);
       setCekMintLog(LANGUAGES[lang].mintSuccess);
-      // Tidak perlu alert, pesan sudah ada di UI
+      // Fetch NFT image from metadata after successful mint
+        try {
+            const meta = await fetch(tokenURI).then(res => res.json());
+            setNftImg(meta.image || NFT_IMAGE);
+        } catch(e) {
+            console.warn("Gagal fetch metadata setelah mint sukses:", e);
+            // nftImg sudah default atau dari checkMinted sebelumnya, jadi tidak perlu set ulang ke NFT_IMAGE di sini
+        }
 
     } catch (err) {
       console.error("Kesalahan detail dalam mintIdentityNFT:", err);
       setStatus("❌ " + LANGUAGES[lang].mintError + " " + (err?.message || String(err)));
-      // txHash, ipfsHashDisplay, metadataUrl mungkin sudah di-set jika error terjadi di tengah jalan, biarkan.
-      // Jika error di awal (Pinata gagal total), mereka akan kosong.
       setLoading(false);
-      // Jangan set minted ke false jika errornya adalah "already minted"
       if (err.message !== LANGUAGES[lang].alreadyMinted) {
-        setMinted(false);
+        // Jangan set minted ke false jika errornya adalah "already minted", karena checkMinted akan menanganinya
+        // setMinted(false); // Ini bisa dipertimbangkan ulang, karena checkMinted akan verifikasi lagi.
       }
     }
   }
@@ -448,7 +476,7 @@ export default function MintIdentity() {
             OKX Wallet
           </button>
           <button onClick={() => setShowWalletModal(false)} style={{
-            ...btnStyle("#444"), width: "100%", marginTop: 15, fontSize: 15
+            ...btnStyle("#444"), width: "100%", marginTop: 15, fontSize: 15, color: "#fff"
           }}>Batal</button>
         </div>
       </div>
@@ -461,7 +489,7 @@ export default function MintIdentity() {
       <div
         style={{
           display: "flex", alignItems: "center", justifyContent: "center",
-          marginBottom: 20,
+          // marginBottom: 20, // Dihapus karena parent container yang akan mengatur margin
         }}
       >
         <div style={{
@@ -472,7 +500,8 @@ export default function MintIdentity() {
           boxShadow: "0 3px 18px #00ffc255, 0 1px 10px #a259ff30",
           border: "2px solid #232837",
           minWidth: 310,
-          maxWidth: 340,
+          maxWidth: 380, // Lebarkan sedikit jika perlu
+          width: '100%', // Agar responsif di dalam container
           position: "relative",
           filter: "drop-shadow(0 1px 9px #a259ff33)"
         }}>
@@ -495,17 +524,19 @@ export default function MintIdentity() {
               }}
             />
           </div>
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: 1, textAlign: 'left' }}>
             <div style={{
               fontWeight: 800,
               fontSize: 19,
               color: "#00ffc3",
               letterSpacing: 1,
               fontFamily: "'Orbitron', 'Montserrat', Arial, sans-serif",
-              marginBottom: 3
+              marginBottom: 3,
+              wordBreak: 'break-word'
             }}>
               {user.name}
             </div>
+            <div style={{ fontSize: 13, color: '#b0a8cc', wordBreak: 'break-all' }}>{user.email}</div>
             {!account && (
               <button
                 onClick={() => setShowWalletModal(true)}
@@ -515,7 +546,8 @@ export default function MintIdentity() {
                   fontSize: 15,
                   fontWeight: 700,
                   marginTop: 10,
-                  width: "fit-content"
+                  width: "fit-content",
+                  color: "#191d2e" // Pastikan kontras
                 }}
               >
                 {LANGUAGES[lang].connect}
@@ -531,14 +563,12 @@ export default function MintIdentity() {
               style={{
                 background: "#252d34",
                 color: "#f88",
-                padding: "3px 16px",
+                padding: "6px 16px", // Adjusted padding
                 border: "none",
                 borderRadius: 8,
                 fontWeight: 700,
                 fontSize: 13.5,
                 cursor: "pointer",
-                marginBottom: 0,
-                boxShadow: "0 1px 7px #0002",
                 fontFamily: "'Montserrat', Arial, sans-serif",
                 transition: "all .16s"
               }}
@@ -550,12 +580,6 @@ export default function MintIdentity() {
     );
   }
 
-  // Logika Tombol Mint
-  // isMintButtonDisabled: Tombol disabled jika:
-  // 1. Belum login Google atau connect wallet
-  // 2. Sedang loading
-  // 3. Sudah minted (berdasarkan checkMinted atau mint baru yang berhasil DAN txHash ada)
-  //    DAN tidak ada txHash dari mint baru (artinya 'minted' dari checkMinted)
   const isAlreadyMintedOnLoad = minted && !txHash && !loading;
   const isMintButtonDisabled = !session || !account || loading || isAlreadyMintedOnLoad;
 
@@ -564,14 +588,12 @@ export default function MintIdentity() {
     mintButtonText = LANGUAGES[lang].processing;
   } else if (isAlreadyMintedOnLoad) {
     mintButtonText = LANGUAGES[lang].minted;
-  } else if (minted && txHash) { // Baru saja mint berhasil di sesi ini
-    mintButtonText = LANGUAGES[lang].mintSuccess; // Atau bisa juga "Mint Lagi?" jika diizinkan, atau "Sudah Minted"
+  } else if (minted && txHash) {
+    mintButtonText = LANGUAGES[lang].mintSuccess;
   }
 
   return (
     <>
-      {/* --- Background Textures & Neon Glows --- */}
-      {/* ... (kode background tidak berubah) ... */}
       <div style={{
         background:
           "linear-gradient(120deg,#1c1137 50%,#24134a 100%), url('https://www.transparenttextures.com/patterns/diamond-upholstery.png') repeat",
@@ -586,9 +608,9 @@ export default function MintIdentity() {
       {showWalletModal && <WalletModal />}
       <div
         style={{
-          maxWidth: 480,
+          maxWidth: 520, // Sedikit lebih lebar untuk mengakomodasi konten baru
           margin: "38px auto",
-          padding: "36px 24px 32px 24px",
+          padding: "36px 28px 32px 28px", // Padding disesuaikan
           background:
             "linear-gradient(120deg,rgba(32,19,57,0.98) 66%,rgba(24,30,47,0.98) 100%), url('https://www.transparenttextures.com/patterns/diamond-upholstery.png') repeat",
           borderRadius: 30,
@@ -601,8 +623,6 @@ export default function MintIdentity() {
           zIndex: 2
         }}
       >
-        {/* Glow accent */}
-        {/* ... (kode glow accent tidak berubah) ... */}
         <div style={{
           position: "absolute",
           top: -90, left: -90,
@@ -613,8 +633,6 @@ export default function MintIdentity() {
           zIndex: 0,
           pointerEvents: "none"
         }} />
-        {/* HEADER */}
-        {/* ... (kode header tidak berubah) ... */}
         <div style={{
           display: "flex",
           alignItems: "center",
@@ -665,7 +683,6 @@ export default function MintIdentity() {
             {lang === "id" ? "English" : "Bahasa"}
           </button>
         </div>
-        {/* ... (sisa UI tidak berubah signifikan kecuali tombol mint dan blok hasil) ... */}
         <div style={{
           textAlign: "center",
           marginBottom: 21,
@@ -680,7 +697,7 @@ export default function MintIdentity() {
         <div style={{
           display: "flex",
           justifyContent: "center",
-          marginBottom: 34
+          marginBottom: 24 // Adjusted margin
         }}>
           <div style={{
             borderRadius: 26,
@@ -703,68 +720,135 @@ export default function MintIdentity() {
             />
           </div>
         </div>
+
+        {/* --- KETERANGAN DAN MANFAAT NFT (BARU) --- */}
         <div style={{
-          marginBottom: 28,
-          textAlign: "center",
-          fontWeight: 800,
-          fontSize: 19,
-          fontFamily: "'Montserrat', Arial, sans-serif"
+          margin: "0 auto 28px auto", // Adjusted margin
+          padding: "18px 22px",
+          background: "rgba(25, 29, 46, 0.85)",
+          border: "1.5px solid #a259ff44",
+          borderRadius: "16px",
+          textAlign: "left",
+          fontSize: "15px",
+          fontFamily: "'Montserrat', Arial, sans-serif",
+          boxShadow: "0 3px 15px rgba(0, 0, 0, 0.2)",
+          color: "#d0c8f0",
+          maxWidth: "100%"
+        }}>
+          <h4 style={{
+            color: "#00ffc3",
+            fontFamily: "'Orbitron', 'Montserrat', Arial, sans-serif",
+            fontSize: "18px",
+            letterSpacing: "0.5px",
+            margin: "0 0 12px 0",
+            textAlign: "center",
+            textShadow: "0 1px 3px #00ffc333"
+          }}>{LANGUAGES[lang].nftSectionTitle}</h4>
+          <p style={{ margin: "0 0 10px 0", lineHeight: 1.6, fontSize: "14.5px" }}>
+            {LANGUAGES[lang].nftDescription}
+          </p>
+          <h5 style={{
+            color: "#e0dafc",
+            fontFamily: "'Space Grotesk', 'Montserrat', Arial, sans-serif",
+            fontSize: "16px",
+            margin: "12px 0 8px 0",
+            fontWeight: 700,
+          }}>{LANGUAGES[lang].nftBenefitsTitle}</h5>
+          <ul style={{ listStyleType: "none", paddingLeft: 0, margin: 0, fontSize: "14px" }}>
+            <li style={{ marginBottom: "6px", lineHeight: 1.5 }}>{LANGUAGES[lang].nftBenefit1}</li>
+            <li style={{ marginBottom: "6px", lineHeight: 1.5 }}>{LANGUAGES[lang].nftBenefit2}</li>
+            <li style={{ marginBottom: "6px", lineHeight: 1.5 }}>{LANGUAGES[lang].nftBenefit3}</li>
+            <li style={{ marginBottom: "6px", lineHeight: 1.5 }}>{LANGUAGES[lang].nftBenefit4}</li>
+          </ul>
+        </div>
+
+
+        {/* --- KOLOM AKUN GOOGLE DAN WALLET TERKONEK (MODIFIKASI) --- */}
+        <div style={{
+          // Wrapper ini akan menjadi "kolom" untuk info akun dan wallet jika user login
+          background: session ? "rgba(30, 25, 50, 0.9)" : "transparent", // Background jika ada sesi
+          borderRadius: session ? "20px" : "0",
+          padding: session ? "20px 15px" : "0", // Padding jika ada sesi
+          border: session ? "1.8px solid #a259ff30" : "none",
+          boxShadow: session ? "0 5px 25px rgba(0,0,0,0.25), inset 0 0 10px rgba(42,20,73,0.5)" : "none",
+          marginBottom: "28px" // Margin bawah untuk wrapper
         }}>
           {session ? (
-            <GoogleProfile user={session.user} />
+            <>
+              {/* Judul untuk bagian akun terhubung */}
+              <h3 style={{ 
+                  color: "#00ffc3", 
+                  textAlign: "center", 
+                  marginBottom: "15px", 
+                  fontFamily: "'Orbitron', sans-serif",
+                  fontSize: "20px",
+                  letterSpacing: "1px"
+              }}>
+                  {LANGUAGES[lang].connectedAccountsTitle}
+              </h3>
+              <GoogleProfile user={session.user} />
+              {account && (
+                <div style={{
+                  marginTop: '20px', // Jarak dari GoogleProfile
+                  textAlign: "center",
+                  display: "flex",
+                  flexDirection: 'column', // Susun vertikal untuk tampilan lebih rapi
+                  alignItems: "center",
+                  gap: 12 // Jarak antar elemen
+                }}>
+                  <div style={{
+                    background: "linear-gradient(90deg,#231e40 70%,#a259ff22 100%)",
+                    borderRadius: 10,
+                    padding: "10px 20px",
+                    fontSize: 17,
+                    fontFamily: "'Orbitron', 'Montserrat', Arial, sans-serif",
+                    fontWeight: 800,
+                    color: "#c3b8fd",
+                    border: "1.5px solid #00ffc3",
+                    boxShadow: "0 1px 7px #a259ff33",
+                    wordBreak: 'break-all' // Agar alamat wallet tidak overflow
+                  }}>
+                    {`${LANGUAGES[lang].wallet}: ${shortAddr(account)}`}
+                  </div>
+                  <button
+                    onClick={disconnectWallet}
+                    style={{
+                      ...btnStyle("rgba(45, 50, 60, 0.8)"), // Style tombol disconnect yang lebih gelap
+                      fontSize: 15,
+                      borderRadius: 10,
+                      color: "#ffcdd2", // Warna teks kemerahan
+                      fontWeight: 700,
+                      border: "1.5px solid #a259ff44",
+                      padding: "8px 20px", // Padding yang konsisten
+                      width: "fit-content"
+                    }}
+                  >
+                    {LANGUAGES[lang].disconnect}
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
-            <button onClick={() => signIn("google")} style={{
-              ...btnStyle("linear-gradient(90deg,#a259ff 0%,#00ffc3 100%)"),
-              color: "#191d2e",
-              borderRadius: 13,
-              fontSize: 18,
-              fontWeight: 900,
-              width: "100%",
-              boxShadow: "0 2px 18px #00ffc344",
-              fontFamily: "'Montserrat', Arial, sans-serif"
-            }}>
-              {LANGUAGES[lang].login}
-            </button>
+            // Tombol Login Google jika belum ada sesi
+            // Style div ini konsisten dengan marginBottom yang ada sebelumnya jika tidak ada sesi
+            <div style={{ textAlign: "center", fontWeight: 800, fontSize: 19, fontFamily: "'Montserrat', Arial, sans-serif" }}>
+              <button onClick={() => signIn("google")} style={{
+                ...btnStyle("linear-gradient(90deg,#a259ff 0%,#00ffc3 100%)"),
+                color: "#191d2e",
+                borderRadius: 13,
+                fontSize: 18,
+                fontWeight: 900,
+                width: "100%",
+                boxShadow: "0 2px 18px #00ffc344",
+                fontFamily: "'Montserrat', Arial, sans-serif"
+              }}>
+                {LANGUAGES[lang].login}
+              </button>
+            </div>
           )}
         </div>
-        {account && (
-          <div style={{
-            margin: "0 0 24px 0",
-            textAlign: "center",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: 14
-          }}>
-            <div style={{
-              background: "linear-gradient(90deg,#231e40 70%,#a259ff22 100%)",
-              borderRadius: 10,
-              padding: "8px 18px",
-              fontSize: 17,
-              fontFamily: "'Orbitron', 'Montserrat', Arial, sans-serif",
-              fontWeight: 800,
-              color: "#c3b8fd",
-              border: "1.5px solid #00ffc3",
-              boxShadow: "0 1px 7px #a259ff33"
-            }}>
-              {`${LANGUAGES[lang].wallet}: ${shortAddr(account)}`}
-            </div>
-            <button
-              onClick={disconnectWallet}
-              style={{
-                ...btnStyle("#232837"),
-                fontSize: 15,
-                borderRadius: 10,
-                color: "#fff",
-                fontWeight: 700,
-                border: "1.5px solid #a259ff44"
-              }}
-            >
-              {LANGUAGES[lang].disconnect}
-            </button>
-          </div>
-        )}
-
+        
+        {/* Tombol Mint dan status messages */}
         <div style={{ textAlign: "center", marginTop: 10 }}>
           <button
             onClick={mintIdentityNFT}
@@ -787,7 +871,7 @@ export default function MintIdentity() {
           {cekMintLog && (
             <div style={{
               background: "linear-gradient(93deg,#191d2e 75%,#a259ff22 100%)",
-              color: cekMintLog.startsWith(LANGUAGES[lang].alreadyMinted) || cekMintLog.startsWith(LANGUAGES[lang].mintSuccess) ? "#00ffc3" : "#f88", // Warna berbeda untuk error
+              color: cekMintLog.startsWith(LANGUAGES[lang].alreadyMinted) || cekMintLog.startsWith(LANGUAGES[lang].mintSuccess) ? "#00ffc3" : "#f88",
               padding: "13px 20px",
               borderRadius: 16,
               marginTop: 15,
@@ -810,13 +894,12 @@ export default function MintIdentity() {
           textAlign: "center",
           color: status.startsWith("❌") ? "#f88" : (status.startsWith("✅") ? "#00ffc3" : "#a259ff"),
           fontFamily: "'Montserrat', Arial, sans-serif",
-          textShadow: "0 1px 7px #a259ff33"
+          textShadow: "0 1px 7px #a259ff33",
+          wordBreak: 'break-word' // Agar pesan status panjang tidak overflow
         }}>
           {status}
         </div>
 
-        {/* --- BAGIAN BARU UNTUK MENAMPILKAN TX HASH DAN IPFS HASH SETELAH MINT SUKSES --- */}
-        {/* Tampil jika mint baru berhasil (ada txHash dan ipfsHashDisplay) ATAU jika sudah pernah mint dan datanya ada (dari checkMinted, ipfsHashDisplay ada) */}
         {((txHash && ipfsHashDisplay) || (!txHash && minted && ipfsHashDisplay)) && (
           <div style={{
             marginTop: '20px',
@@ -830,139 +913,40 @@ export default function MintIdentity() {
             boxShadow: "0 2px 10px rgba(0, 255, 195, 0.25)",
             color: "#e3eaff"
           }}>
-            {txHash && ( /* Hanya tampilkan bagian Tx Hash jika txHash ada (dari mint baru) */
+            {txHash && (
               <div style={{ marginBottom: '12px' }}>
                 <span style={{ fontWeight: 'bold', color: '#e3eaff' }}>{LANGUAGES[lang].txHashLabel} </span>
-                <a href={`${EXPLORER_BASE}${txHash}`} target="_blank" rel="noopener noreferrer" style={{ color: '#00ffc3', textDecoration: 'underline', wordBreak: 'break-all', display: 'block', marginTop: '3px' }}>
-                  {txHash}
+                <a href={`${EXPLORER_BASE}${txHash}`} target="_blank" rel="noopener noreferrer" style={{ color: '#00ffc3', textDecoration: 'underline', wordBreak: 'break-all' }}>
+                  {shortAddr(txHash)}
                 </a>
-                <a href={`${EXPLORER_BASE}${txHash}`} target="_blank" rel="noopener noreferrer" style={{ color: '#7cb8f9', textDecoration: 'underline', fontSize: '13px', display: 'inline-block', marginTop: '5px' }}>
+                 <a href={`${EXPLORER_BASE}${txHash}`} target="_blank" rel="noopener noreferrer" style={{ marginLeft: "10px", color: '#82e9de', textDecoration: 'none', fontWeight: 'bold' }}>
                   ({LANGUAGES[lang].viewOnExplorer})
                 </a>
               </div>
             )}
-            {ipfsHashDisplay && metadataUrl && ( /* Tampilkan bagian IPFS jika datanya ada */
+            {ipfsHashDisplay && (
               <div>
                 <span style={{ fontWeight: 'bold', color: '#e3eaff' }}>{LANGUAGES[lang].ipfsHashLabel} </span>
-                <a href={metadataUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#00ffc3', textDecoration: 'underline', wordBreak: 'break-all', display: 'block', marginTop: '3px' }}>
-                  {ipfsHashDisplay}
+                <a href={metadataUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#00ffc3', textDecoration: 'underline', wordBreak: 'break-all' }}>
+                  {shortAddr(ipfsHashDisplay)}
                 </a>
-                <a href={metadataUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#7cb8f9', textDecoration: 'underline', fontSize: '13px', display: 'inline-block', marginTop: '5px' }}>
+                 <a href={metadataUrl} target="_blank" rel="noopener noreferrer" style={{ marginLeft: "10px", color: '#82e9de', textDecoration: 'none', fontWeight: 'bold' }}>
                   ({LANGUAGES[lang].explorer})
                 </a>
               </div>
             )}
           </div>
         )}
-        {/* --- AKHIR BAGIAN BARU --- */}
 
-        {/* Telegram Channel Card */}
-        {/* ... (kode Telegram card tidak berubah) ... */}
-        <div style={{
-          marginTop: 40,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center"
-        }}>
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            background: "linear-gradient(90deg,#191d2e 60%,#a259ff33 100%)",
-            padding: "18px 32px",
-            borderRadius: 20,
-            boxShadow: "0 2.5px 22px #a259ff40",
-            border: "2px solid #00ffc355",
-            maxWidth: 400,
-            gap: 17
-          }}>
-            <img
-              src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png"
-              alt="Telegram"
-              width={42}
-              height={42}
-              style={{ borderRadius: 10, marginRight: 10, background: "#fff" }}
-            />
-            <div>
-              <div style={{
-                color: "#00ffc3",
-                fontSize: 17,
-                fontWeight: 900,
-                marginBottom: 3,
-                letterSpacing: 0.13,
-                fontFamily: "'Orbitron', 'Montserrat', Arial, sans-serif"
-              }}>
-                Join Our Official Airdrop Channel
-              </div>
-              <a
-                href="https://t.me/airdrop4ll"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  color: "#7cb8f9",
-                  fontWeight: 900,
-                  fontSize: 18,
-                  letterSpacing: 0.3,
-                  textDecoration: "none",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  marginTop: 3,
-                  fontFamily: "'Orbitron', 'Montserrat', Arial, sans-serif"
-                }}
-              >
-                <span style={{
-                  background: "linear-gradient(90deg,#00ffc3 20%,#a259ff 80%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  fontWeight: 900,
-                  fontSize: 19
-                }}>
-                  t.me/airdrop4ll
-                </span>
-                <svg xmlns="http://www.w3.org/2000/svg" height="19" width="19" viewBox="0 0 24 24" fill="#7cb8f9">
-                  <path d="M5 12h14M12 5l7 7-7 7" stroke="#7cb8f9" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </a>
-            </div>
-          </div>
-        </div>
-        <div style={{
-          marginTop: 18,
-          textAlign: "center",
-          fontSize: 15,
-          color: "#a3a6c6",
-          letterSpacing: 0.22,
-          fontWeight: 700,
-          fontFamily: "'Montserrat', Arial, sans-serif"
-        }}>
-          {LANGUAGES[lang].powered} <span style={{ color: "#00ffc3", fontWeight: 900 }}>AFA Community x RISECHAIN</span>
+        <div style={{ textAlign: "center", marginTop: 30, fontSize: 13, color: "#aaa" }}>
+            <a href="https://t.me/airdropforalllimit" target="_blank" rel="noopener noreferrer" style={{ color: "#00ffc3", textDecoration: "none", fontWeight: "bold" }}>
+                {LANGUAGES[lang].follow}
+            </a>
+            <p style={{ marginTop: 8, color: "#777" }}>
+                {LANGUAGES[lang].powered} <a href="https://riselabs.xyz" target="_blank" rel="noopener noreferrer" style={{ color: "#a259ff", textDecoration: "none", fontWeight: "bold" }}>Rise Labs</a> & AFA Community
+            </p>
         </div>
       </div>
     </>
   );
-}
-
-// Helper functions
-function shortAddr(addr) {
-  if (!addr) return "";
-  return addr.slice(0, 7) + "..." + addr.slice(-4);
-}
-// function shortTx(tx) { // Tidak digunakan lagi, menampilkan hash penuh
-//   if (!tx) return "";
-//   return tx.slice(0, 8) + "..." + tx.slice(-6);
-// }
-function btnStyle(bg) {
-  return {
-    background: bg,
-    color: "#fff",
-    padding: "10px 22px",
-    border: "none",
-    borderRadius: "11px",
-    fontWeight: 800,
-    fontSize: 17,
-    cursor: "pointer",
-    margin: "0 4px 0 0",
-    transition: "all 0.23s",
-    boxShadow: "0 1px 11px #a259ff33"
-  };
 }
